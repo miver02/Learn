@@ -1,8 +1,10 @@
-from fastapi import FastAPI, Query, Path, Form, Header, Cookie, Request, UploadFile, File, HTTPException
+from fastapi import FastAPI, Query, Path, Form, Header, Cookie, Request, UploadFile, File, HTTPException,responses
+from fastapi.responses import HTMLResponse
 import uvicorn
 from  typing import Union, List
 
-from module.module import *
+from model.model import Item, User, Order
+from model.serializers import UserResponse, UserpriceResponse
 
 
 
@@ -23,7 +25,7 @@ async def login(username: str, password: str) -> dict:
     }
 
 # 查询参数:在函数中定义而不再路径中的参数就是查询参数
-@app.get("/demo")
+@app.get("/demo/")
 async def demo(name: str, age: int) -> dict:
     return {
         "name": name,
@@ -31,7 +33,7 @@ async def demo(name: str, age: int) -> dict:
     }
 
 # 设置默认值
-@app.get('/demo/page')
+@app.get('/demo/page/')
 async def demo_page(page: str | None = None, size: Union[int, None] = None):
     return {
         'page': page,
@@ -39,7 +41,7 @@ async def demo_page(page: str | None = None, size: Union[int, None] = None):
     }
 
 # 查询参数效验
-@app.get('/demo/page/check')
+@app.get('/demo/page/check/')
 async def demo_page_check(token: str | None = Query(
     default=None,
     title="Token",
@@ -149,11 +151,9 @@ async def upload_multiple_files(files: List[UploadFile]):
 # 多文件上传 + 表单参数
 @app.post('/upload/')
 async def upload(
-
     user_id: str = Form(...),
     description: str = Form(...),
     files: List[UploadFile] | None = None,
-
 ):
     return {
         "code": 200,
@@ -168,10 +168,49 @@ async def upload(
 async def get_user(user_id: int):
     # 假设通过user_id从数据库中获取到了数据如下
     user = {
-        'id': user_id,
-        'name': 'John Doe',
-        'email': 'John@example.com'
+        "username": "miver",
+        "email": "miver@example.com",
+        "age": 15
     }
+
+    return {
+        "data": user,
+        "message": "hello, miver"
+    }
+
+# 嵌套+继承响应模型
+@app.get('/users/{user_id}/price/', response_model=UserpriceResponse)
+async def get_userprice(user_id: int):
+# 假设通过user_id从数据库中获取到了数据如下
+    user = {
+        "username": "miver",
+        "email": "miver@example.com",
+        "age": 15
+    }
+    item = {
+        "name": "王二",
+        "price": 13546.13,
+        "is_offer": True
+    }
+    
+    return {
+        "username": user['username'],
+        "email": user['email'],
+        "age": user['age'],
+        "item": item,
+        "message": "这是嵌套继承响应模型"
+    }
+
+# 自定义响应模型
+@app.get('/users/demo-response/', response_class=HTMLResponse)
+async def demo_response():
+    return """
+    <html>
+    <h1>这是自定义响应模型:HTMLResponse</h1>
+    </html>
+    """
+    
+
 
 
 

@@ -12,11 +12,13 @@ class Item(BaseModel):
 class User(BaseModel):
     username: str = Field(min_length=3, max_length=30)
     email: EmailStr
-    age: int | None = None
+    age: int | None = Field(None, gt=14, le=65)
 
 class Order(BaseModel):
     id: int
     user: User
     items: list[str]
     total: float
+
+
 
