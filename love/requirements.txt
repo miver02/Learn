@@ -1,0 +1,17 @@
+# Love项目依赖包
+# 主要使用Python标准库，以下是可选的增强包
+
+# 图形界面增强
+pillow>=10.0.0
+matplotlib>=3.7.0
+numpy>=1.24.0
+
+# 动画和效果增强
+pygame>=2.5.0
+
+# 开发工具
+black>=23.0.0
+flake8>=6.0.0
+
+# 注意：tkinter是Python标准库的一部分，无需安装
+# turtle也是Python标准库的一部分，无需安装
