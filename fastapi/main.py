@@ -1,10 +1,9 @@
-from fastapi import FastAPI, Query, Path, Form, Header, Cookie, Request, UploadFile, File, HTTPException,responses
+from fastapi import FastAPI, Query, Path, Form, Header, Cookie, Request, UploadFile, File, HTTPException, Response
 from fastapi.responses import HTMLResponse
 import uvicorn
 from  typing import Union, List
 
-from model.model import Item, User, Order
-from model.serializers import UserResponse, UserpriceResponse
+from module.serializers import UserResponse, UserpriceResponse, Item, User, Order
 
 
 
@@ -210,6 +209,37 @@ async def demo_response():
     </html>
     """
     
+# 响应头中返回cookie信息 + 自定义响应头
+@app.post("/login/response_cookie/")
+def response_cookie(response: Response):
+    response.headers['musen-wx'] = 'python771'
+    response.headers['xh-wh'] = 'musen123'
+    response.set_cookie(
+        key="sessionid",
+        value="abc123...",
+        max_age=1800,        
+        expires=None,        
+        path="/",
+        domain=None,         
+        secure=False,        
+        httponly=True,       
+        samesite="lax"       
+    )
+    return {
+        "ok": True,
+        # "response": response
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
