@@ -1,10 +1,17 @@
-from fastapi import FastAPI, Query, Path, Form, Header, Cookie, Request, UploadFile, File, HTTPException, Response
+from datetime import timedelta
+from fastapi import FastAPI, Query, Path, Form, Header, Cookie, Request, UploadFile, File, HTTPException, Response, Depends, status
 from fastapi.responses import HTMLResponse
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import uvicorn
-from  typing import Union, List
+from  typing import Annotated, Union, List
 
-from module.serializers import UserResponse, UserpriceResponse, Item, User, Order
-
+from module.serializers import UserInfo, UserResponse, UserpriceResponse, Item, User, Order, UserPwd, Token
+from module.settings import ACCESS_TOKEN_EXPIRE_MINUTES, fake_users_db
+from module.security import (
+    create_access_token, get_current_user, get_current_active_user,
+    fake_hash_password, authenticate_user, get_password_hash, 
+    )
+    
 
 
 # 创建fastapi对象app
@@ -230,17 +237,54 @@ def response_cookie(response: Response):
         # "response": response
     }
 
+# 生成简化token
+@app.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    # 模拟数据库验证用户名是否存在
+    user_dict = fake_users_db.get(form_data.username)
+    if not user_dict:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    # 字典解包,创建UserPwd类的实例对象
+    user = UserPwd(**user_dict)
+    hashed_password = fake_hash_password(form_data.password)
+    if not hashed_password == user.hashed_password:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    return {"access_token": user.username, "token_type": "bearer"}
 
 
 
+# 得到hash密码
+@app.get('/pwd/')
+async def get_hashed_pwd(origin_pwd: str) -> dict:
+    return {
+        "origin_pwd": origin_pwd,
+        "hashed_pwd": get_password_hash(origin_pwd)
+    }
 
 
 
+# 获取用户个人信息
+@app.get("/users/me/")
+async def read_users_me(current_user: Annotated[UserInfo, Depends(get_current_active_user)]):
+    return UserInfo(**current_user.model_dump()) # 显式将子类实例转换为父类实例
 
 
-
-
-
+@app.post("/token/jwt/")
+async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
+    userpwd = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    if not userpwd:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": userpwd.username}, expires_delta=access_token_expires
+    )
+    return Token(access_token=access_token, token_type="bearer")
 
 
 

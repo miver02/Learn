@@ -1,4 +1,5 @@
 
+from typing import Union
 from pydantic import BaseModel, Field, EmailStr
 
 # 定义json数据模型 -> /items/
@@ -30,3 +31,26 @@ class UserResponse(BaseModel):
 class UserpriceResponse(User):
     item: Item
     message: str | None
+
+
+# 用户密码
+class UserInfo(BaseModel):
+    username: str
+    email: Union[str, None] = None
+    full_name: Union[str, None] = None
+    disabled: Union[bool, None] = None
+    # model_config = {"extra": "forbid"}  # 不能给 UserInfo 实例添加额外属性,，但无法「剥离子类实例自带的字段」。
+
+
+class UserPwd(UserInfo):
+    hashed_password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str | None = None
+
+
