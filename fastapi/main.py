@@ -1,12 +1,14 @@
 from datetime import timedelta
 from fastapi import FastAPI, Query, Path, Form, Header, Cookie, Request, UploadFile, File, HTTPException, Response, Depends, status
 from fastapi.responses import HTMLResponse
+from fastapi.middleware import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import uvicorn
 from  typing import Annotated, Union, List
 
+from module.sql import create_db_and_table
 from module.serializers import UserInfo, UserResponse, UserpriceResponse, Item, User, Order, UserPwd, Token
-from module.settings import ACCESS_TOKEN_EXPIRE_MINUTES, fake_users_db
+from module.settings import ACCESS_TOKEN_EXPIRE_MINUTES, fake_users_db, origins
 from module.security import (
     create_access_token, get_current_user, get_current_active_user,
     fake_hash_password, authenticate_user, get_password_hash, 
@@ -14,8 +16,30 @@ from module.security import (
     
 
 
+
+
+
 # 创建fastapi对象app
 app = FastAPI()
+
+
+# 配置CORS(跨域资源共享)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# create the database tables on startup
+@app.on_event("startup")
+def on_startup():
+    create_db_and_table
+
+
+
 
 # api主页
 @app.get("/")
@@ -285,6 +309,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         data={"sub": userpwd.username}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
+
 
 
 

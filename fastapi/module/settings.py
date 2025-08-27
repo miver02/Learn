@@ -1,8 +1,12 @@
 
+
+
+# jwt加密
 SECRET_KEY = "800043f784d95341c66fabd500335ca3ce7fe4098cfbaedcd05646417d9a3872"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+# 伪数据库
 fake_users_db = {
     "miver": {
         "username": "miver",
@@ -26,4 +30,19 @@ fake_users_db = {
         "disabled": True,
     },
 }
+
+
+# CORS(跨域资源共享)
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+# database
+sqlite_file_name = "database.db"
+sqlite_url = f"sqlite:///{sqlite_file_name}"
+
+connect_args = {"check_same_thread": False} # It is possible to make FastAPI use the same SQLite database across different threads
 
