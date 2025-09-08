@@ -1,0 +1,12 @@
+services:
+  go-learn:
+    image: go-learn:zll
+    build: .
+    container_name: go-learning-env
+    volumes:
+      - ./:/go/src/app
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    working_dir: /go/src/app
+    command: bash
