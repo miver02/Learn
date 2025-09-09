@@ -11,5 +11,6 @@ func main() {
 	basic_type.BasicTypeDemo()
 	println(variable.Global)
 	// println(variable.internal) // 内部变量不能被外部访问
+	variable.VariableDemo()
 
 }
