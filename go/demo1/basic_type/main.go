@@ -1,7 +1,7 @@
-package main
+package basic_type
 
 
-func main() {
+func BasicTypeDemo() {
 	var a int = 234
 	var b int =345
 	println(a + b)
@@ -18,9 +18,7 @@ func main() {
 	// var d int32 = 12
 	// println(a + b)
 
-	String()
-
-
+	StringDemo()
 
 }
 	

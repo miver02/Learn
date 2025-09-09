@@ -1,7 +1,7 @@
-package main
+package hello_world
 
 
-func main() {
+func HelloWorldDemo() {
 	println("hello world!")
 
 }

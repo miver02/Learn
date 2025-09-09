@@ -1,11 +1,12 @@
-package main
+package basic_type
 
+import "unicode/utf8"
 
-func String() {
+func StringDemo() {
 	println("hello" + "go")
 	println(len("abc"))
-	//println(len("你�"))
-       	//println(utf8.RuneCountInString("你�"))
-
+	println(len("你好"))
+    println(utf8.RuneCountInString("你好"))
 
 }
+
