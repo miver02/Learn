@@ -39,6 +39,24 @@ func BaseGrammer2() {
 	// 闭包
 	str := funcs.Closure("world!")
 	println(str())
+
+	// 不定参数
+	funcs.UseYouName()
+
+	// defer是后进先出
+	funcs.Defer()
+
+	// 闭包与参数
+	// funcs.DeferV1()
+	// funcs.DeferV2()
+
+	// println(funcs.DeferReturnV1())
+	// println(funcs.DeferReturnV2())
+	// println(funcs.DeferReturnV3())
+
+	// funcs.DeferTestV1()
+	// funcs.DeferTestV2()
+	// funcs.DeferTestV3()
 }
 
 
