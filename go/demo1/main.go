@@ -10,6 +10,8 @@ import "github.com/miver02/Learn/go/demo1/consts"
 // BaseGrammer2
 // 方法签名:名字 + 参数列表 + 返回值 
 import "github.com/miver02/Learn/go/demo1/funcs"
+import "github.com/miver02/Learn/go/demo1/control"
+import "github.com/miver02/Learn/go/demo1/buildin_type"
 
 
 
@@ -47,16 +49,33 @@ func BaseGrammer2() {
 	funcs.Defer()
 
 	// 闭包与参数
-	// funcs.DeferV1()
-	// funcs.DeferV2()
+	funcs.DeferV1()
+	funcs.DeferV2()
 
-	// println(funcs.DeferReturnV1())
-	// println(funcs.DeferReturnV2())
-	// println(funcs.DeferReturnV3())
+	println(funcs.DeferReturnV1())
+	println(funcs.DeferReturnV2())
+	println(funcs.DeferReturnV3())
 
-	// funcs.DeferTestV1()
-	// funcs.DeferTestV2()
-	// funcs.DeferTestV3()
+	funcs.DeferTestV1()
+	funcs.DeferTestV2()
+	funcs.DeferTestV3()
+
+	// 循环
+	control.ForArr()
+	control.ForMap()
+	control.Swith(0)
+	control.SwithBool(0)
+
+	// 数组
+	buildin_type.Array()
+	// 切片
+	buildin_type.Slice()
+	// 子切片
+	buildin_type.SubSlice()
+	// 切片共享
+	buildin_type.ShareSlice()
+	// Map
+	buildin_type.Map()
 }
 
 
