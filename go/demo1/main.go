@@ -1,24 +1,18 @@
 package main
-// package demo1
 
 // BaseGrammer1
-import "github.com/miver02/Learn/go/demo1/hello_world"
-import "github.com/miver02/Learn/go/demo1/basic_type"
-import "github.com/miver02/Learn/go/demo1/variable"
-import "github.com/miver02/Learn/go/demo1/consts"
-
-// BaseGrammer2
-// 方法签名:名字 + 参数列表 + 返回值 
-import "github.com/miver02/Learn/go/demo1/funcs"
-import "github.com/miver02/Learn/go/demo1/control"
-import "github.com/miver02/Learn/go/demo1/buildin_type"
-
-//BaseGrammer3
-import "github.com/miver02/Learn/go/demo1/types"
-
-
-
-
+import (
+	"github.com/miver02/Learn/go/demo1/basic_type"
+	"github.com/miver02/Learn/go/demo1/buildin_type"
+	"github.com/miver02/Learn/go/demo1/component"
+	"github.com/miver02/Learn/go/demo1/consts"
+	"github.com/miver02/Learn/go/demo1/control"
+	"github.com/miver02/Learn/go/demo1/funcs"
+	"github.com/miver02/Learn/go/demo1/generics"
+	"github.com/miver02/Learn/go/demo1/hello_world"
+	"github.com/miver02/Learn/go/demo1/types"
+	"github.com/miver02/Learn/go/demo1/variable"
+)
 
 func BaseGrammer1() {
 	hello_world.HelloWorldDemo()
@@ -91,8 +85,21 @@ func BaseGrammer3() {
 	types.ChangeUser()
 	// 衍生类型
 	types.UseInteger()
-}
+	// 结构体组合
+	outerV1 := component.OuterV1{}
+	outerV1.OuterV1Im()
 
+	// 泛型
+	list1 := [9]int{1, 2, 3, 4, 5, 7, 8, 9, 10}
+	generics.UseList()
+	generics.Sum(1.2, 2.3, 3.3, 4.1)
+	generics.Sum(1, 2, 3, 4)
+	generics.Max(1, 2, 3, 4)
+	generics.Min(1, 2, 3, 4)
+	// 修复类型不匹配，将数组转换为切片
+	generics.AddSlice(list1[:], 5, 6)
+
+}
 
 func main() {
 	// BaseGrammer1()
