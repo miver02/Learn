@@ -13,6 +13,11 @@ import "github.com/miver02/Learn/go/demo1/funcs"
 import "github.com/miver02/Learn/go/demo1/control"
 import "github.com/miver02/Learn/go/demo1/buildin_type"
 
+//BaseGrammer3
+import "github.com/miver02/Learn/go/demo1/types"
+
+
+
 
 
 func BaseGrammer1() {
@@ -52,6 +57,7 @@ func BaseGrammer2() {
 	funcs.DeferV1()
 	funcs.DeferV2()
 
+	//defer 语句会将其后面的函数调用推迟到包含该 defer 语句的函数即将返回时执行
 	println(funcs.DeferReturnV1())
 	println(funcs.DeferReturnV2())
 	println(funcs.DeferReturnV3())
@@ -78,9 +84,19 @@ func BaseGrammer2() {
 	buildin_type.Map()
 }
 
+func BaseGrammer3() {
+	// 接口
+	types.NewUser()
+	// 结构体和指针接收器区别
+	types.ChangeUser()
+	// 衍生类型
+	types.UseInteger()
+}
+
 
 func main() {
 	// BaseGrammer1()
-	BaseGrammer2()
+	// BaseGrammer2()
+	BaseGrammer3()
 
 }

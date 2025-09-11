@@ -77,8 +77,9 @@ func DeferTestV2() {
 
 func DeferTestV3() {
 	println("=======test3=======")
+	var j int
 	for i := 0; i < 10; i++ {
-		j := i
+		j = i
 		defer func() {
 			
 			fmt.Printf("out: %p ", &j)
