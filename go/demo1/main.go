@@ -1,6 +1,5 @@
 package main
 
-// BaseGrammer1
 import (
 	"github.com/miver02/Learn/go/demo1/basic_type"
 	"github.com/miver02/Learn/go/demo1/buildin_type"
@@ -104,6 +103,6 @@ func BaseGrammer3() {
 func main() {
 	// BaseGrammer1()
 	// BaseGrammer2()
-	BaseGrammer3()
+	// BaseGrammer3()
 
 }
