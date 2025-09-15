@@ -6,8 +6,9 @@ import (
 )
 
 type Product struct {
-	gorm.Model
-	Code  string
+	// gorm.Model
+	ID    int64  `gorm:"primaryKey, autoIncrement"`
+	Code  string `gorm:"unique"`
 	Price uint
 }
 
