@@ -12,6 +12,8 @@ import (
 	"github.com/miver02/Learn/go/webook/internal/service"
 )
 
+// var ErrUserDuplicateEmail = service.ErrUserDuplicateEmail
+
 // user相关路由定义
 type UserHandle struct {
 	svc 	*service.UserService
@@ -80,6 +82,10 @@ func (u *UserHandle) SignUp(ctx *gin.Context) {
 		Email: req.Email,
 		Password: req.Password,
 	})
+	if err == service.ErrUserDuplicateEmail {
+		ctx.String(http.StatusOK, "邮箱冲突")
+		return
+	}
 	if err != nil {
 		ctx.String(http.StatusOK, "系统错误")
 		fmt.Printf("%v\n", err)

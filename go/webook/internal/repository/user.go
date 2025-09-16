@@ -7,6 +7,8 @@ import (
 	"github.com/miver02/Learn/go/webook/internal/repository/dao"
 )
 
+var ErrUserDuplicateEmail = dao.ErrUserDuplicateEmail
+
 type UserRepository struct {
 	dao *dao.UserDAO
 }
