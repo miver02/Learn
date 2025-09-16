@@ -19,3 +19,4 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - '8000:6379'  # Redis默认端口是6379，容器内必须映射6379
+
