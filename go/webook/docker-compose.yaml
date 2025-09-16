@@ -9,10 +9,10 @@ mysql8:
     ./script/mysql/:/docker-entrypbint-initdb.d/
   ports:
     # 注意这里我映射为了 13316 端口
-    "13316:3306"
+    "5000:5000"
   redis:
     image: 'bitnami/redis:latest'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
-      '6379:6379'
+      '8000:8000'
