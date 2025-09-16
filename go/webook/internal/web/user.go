@@ -1,3 +1,4 @@
+// user业务层:调用服务层,并返回结果
 package web
 
 import (
@@ -83,7 +84,7 @@ func (u *UserHandle) SignUp(ctx *gin.Context) {
 		Password: req.Password,
 	})
 	if err == service.ErrUserDuplicateEmail {
-		ctx.String(http.StatusOK, "邮箱冲突")
+		ctx.String(http.StatusOK, err.Error())
 		return
 	}
 	if err != nil {
@@ -98,8 +99,32 @@ func (u *UserHandle) SignUp(ctx *gin.Context) {
 }
 
 func (u *UserHandle) Login(ctx *gin.Context) {
-	
-	
+	type LoginReq struct {
+		Email		string `json:"email"`
+		Password 	string `json:"password"`
+	}
+
+	var req LoginReq
+	if err := ctx.Bind(&req); err != nil {
+		return
+	}
+
+	err := u.svc.Login(ctx, domain.User{
+		Email: 		req.Email,
+		Password: 	req.Password,
+	})
+	if err == service.ErrInvalidUserOrPassword {
+		ctx.String(http.StatusOK, err.Error())
+		return
+	}
+	if err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+
+	ctx.String(http.StatusOK, "登录成功")
+	fmt.Printf("%v\n", req)
+
 }
 
 func (u *UserHandle) Edit(ctx *gin.Context) {

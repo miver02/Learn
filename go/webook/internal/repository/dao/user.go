@@ -1,3 +1,4 @@
+// 数据库层
 package dao
 
 import (
@@ -11,7 +12,19 @@ import (
 
 var (
 	ErrUserDuplicateEmail = errors.New("邮箱冲突")
+	ErrUserNotFound = gorm.ErrRecordNotFound
 )
+
+//	User 直接对应数据库表
+type User struct {
+	Id 			int64 	`gorm:"primaryKey,autoIncrement"` 
+	Email 		string	`gorm:"unique"`	
+	Password 	string
+	// 创建时间
+	Ctime 		int64
+	// 更新时间
+	Utime 		int64
+}
 
 type UserDAO struct {
 	db *gorm.DB
@@ -21,6 +34,12 @@ func NewUserDAO(db *gorm.DB) *UserDAO {
 	return &UserDAO{
 		db: db,
 	}
+}
+
+func (dao *UserDAO) FindByEmail(ctx context.Context, email string) (User, error) {
+	var u User
+	err := dao.db.WithContext(ctx).Where("email = ?", email).Find(&u).Error
+	return u, err
 }
 
 func (dao *UserDAO) Insert(ctx context.Context, u User) error {
@@ -38,14 +57,4 @@ func (dao *UserDAO) Insert(ctx context.Context, u User) error {
 	return err
 }
 
-//	User 直接对应数据库表
-type User struct {
-	Id 			int64 	`gorm:"primaryKey,autoIncrement"` 
-	Email 		string	`gorm:"unique"`	
-	Password 	string
-	// 创建时间
-	Ctime 		int64
-	// 更新时间
-	Utime 		int64
-}
 
