@@ -1,18 +1,21 @@
-mysql8:
-  image: mysql:8.0.29
-  restart: always
-  command: bash
-  environment:
-    MYSQL_ROOT_PASSWORD: root
-  volumes:
-    # 设置初始化脚本
-    ./script/mysql/:/docker-entrypbint-initdb.d/
-  ports:
-    # 注意这里我映射为了 13316 端口
-    "5000:5000"
+services:
+  # MySQL服务
+  mysql8:
+    image: mysql:8.0.29
+    restart: always
+    # 注意：mysql镜像默认启动命令是 mysqld，不要改成 bash，否则数据库无法启动
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      # 注意路径格式：左侧宿主机路径，右侧容器内路径（docker-entrypoint-initdb.d 拼写正确）
+      - ./script/mysql/:/docker-entrypoint-initdb.d/
+    ports:
+      - "5000:3306"  # MySQL默认端口是3306，容器内必须映射3306，宿主机端口可自定义
+
+  # Redis服务（与mysql8平级，都在services下）
   redis:
     image: 'bitnami/redis:latest'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
-      '8000:8000'
+      - '8000:6379'  # Redis默认端口是6379，容器内必须映射6379
