@@ -1,0 +1,16 @@
+services:
+  learn:
+    image: learn:zll
+    build: .
+    container_name: zll-learn
+    volumes:
+      - ./:/root/learn
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    working_dir: /root/learn
+    environment:
+      - CGO_ENABLED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    command: bash
