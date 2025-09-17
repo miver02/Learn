@@ -17,9 +17,13 @@ var (
 
 //	User 直接对应数据库表
 type User struct {
-	Id 			int64 	`gorm:"primaryKey,autoIncrement"` 
-	Email 		string	`gorm:"unique"`	
-	Password 	string
+	Id 				int64 	`gorm:"primaryKey,autoIncrement"` 
+	Name			string
+	Email 			string	`gorm:"unique"`	
+	Password 		string
+	Birthday  		string
+	Introduction 	string
+
 	// 创建时间
 	Ctime 		int64
 	// 更新时间
@@ -37,9 +41,9 @@ func NewUserDAO(db *gorm.DB) *UserDAO {
 }
 
 func (dao *UserDAO) FindByEmail(ctx context.Context, email string) (User, error) {
-	var u User
-	err := dao.db.WithContext(ctx).Where("email = ?", email).Find(&u).Error
-	return u, err
+	var ud User
+	err := dao.db.WithContext(ctx).Where("email = ?", email).Find(&ud).Error
+	return ud, err
 }
 
 func (dao *UserDAO) Insert(ctx context.Context, u User) error {

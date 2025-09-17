@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/miver02/Learn/go/webook/internal/domain"
 	"github.com/miver02/Learn/go/webook/internal/service"
+	"github.com/gin-contrib/sessions"
 )
 
 // var ErrUserDuplicateEmail = service.ErrUserDuplicateEmail
@@ -109,7 +110,7 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 		return
 	}
 
-	err := u.svc.Login(ctx, domain.User{
+	datas_u, err := u.svc.Login(ctx, domain.User{
 		Email: 		req.Email,
 		Password: 	req.Password,
 	})
@@ -122,8 +123,14 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 		return
 	}
 
+	// 设置session
+	sess := sessions.Default(ctx)
+	sess.Set("UserId", datas_u.Id)
+	sess.Save()
+
 	ctx.String(http.StatusOK, "登录成功")
 	fmt.Printf("%v\n", req)
+	
 
 }
 
@@ -164,6 +171,5 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 }
 
 func (u *UserHandle) Profile(ctx *gin.Context) {
-	
-	
+	ctx.String(http.StatusOK, "这是profile")
 }

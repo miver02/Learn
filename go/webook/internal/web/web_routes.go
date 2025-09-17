@@ -39,7 +39,3 @@ func RegisterUserRoutes(api *gin.Engine, svc *service.UserService) {
 }
 
 
-
-
-
-
