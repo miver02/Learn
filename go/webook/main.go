@@ -35,7 +35,7 @@ func main() {
 
 func InitDB() *gorm.DB {
 	// 数据库连接
-	db, err := gorm.Open(mysql.Open("root:root@tcp(10.101.0.95:40019)/webook?charset=utf8mb4&parseTime=True&loc=Local"))
+	db, err := gorm.Open(mysql.Open("root:root@tcp(10.101.0.95:40018)/webook?charset=utf8mb4&parseTime=True&loc=Local"))
 	if err != nil {
 		// panic相当于整个goroutine结束
 		panic("数据库连接失败: " + err.Error())
