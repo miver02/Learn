@@ -35,7 +35,7 @@ func RegisterUserRoutes(api *gin.Engine, svc *service.UserService) {
 	ug.POST("/login", func(ctx *gin.Context) { u.Login(ctx) })
 	ug.POST("/edit", func(ctx *gin.Context) { u.Edit(ctx) })
 	ug.GET("/profile", func(ctx *gin.Context) { u.Profile(ctx) })
-	// ug.POST("/logout", func(ctx *gin.Context) {})
+	ug.POST("/logout", func(ctx *gin.Context) { u.Logout(ctx) })
 }
 
 

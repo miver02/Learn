@@ -56,17 +56,43 @@ func (mb *MiddlewareBuilder) LoginMiddleWareMiddlewareBuilder(api *gin.Engine) *
 		}
 
 		sess := sessions.Default(ctx)
-		id := sess.Get("UserId");
-		// 打印会话 ID 和 userId，查看是否为空
-		fmt.Printf("会话ID: %s\n", sess.ID())
-		fmt.Printf("userId: %v\n", id)
-		if id == nil {
+		idVal := sess.Get("UserId")
+		if idVal == nil {
 			// 没有登陆
 			ctx.AbortWithError(http.StatusUnauthorized, errors.New("未登录会话"))
 			return
 		}
+		// 打印会话 ID 和 userId，查看是否为空
+		fmt.Printf("会话ID: %s\n", sess.ID())
+		fmt.Printf("userid: %v\n", idVal)
+
+		// 1. 无论是否首次访问，都显式设置 MaxAge（核心修正）
+		sess.Options(sessions.Options{
+			MaxAge:   10 * 60, // 10分钟，按你的需求设置
+			Path:     "/",     // 确保路径匹配，避免多个 Cookie 冲突
+			Domain:   "127.0.0.1", // 明确域名，与请求一致
+			HttpOnly: true,
+			Secure:   false,   // 本地开发关闭 Secure
+		})
+		
+		// 2. 处理 update_time 逻辑（保持你的业务逻辑）
+		now := time.Now().UnixMilli()
+		updateTime := sess.Get("update_time")
+		
+		if updateTime == nil {
+			sess.Set("update_time", now)
+		} else {
+			updateTimeval, _ := updateTime.(int64)
+			if now-updateTimeval > 60*1000*9 { // 1分钟更新一次
+				sess.Set("update_time", now)
+			}
+		}
+
+		// 3. 关键：无论是否修改，都保存会话（确保 Options 生效）
+		if err := sess.Save(); err != nil {
+			// 处理保存错误
+			ctx.AbortWithError(http.StatusUnauthorized, errors.New("会话保存失败"))
+		}
 	})
 	return api
 }
-
-

@@ -126,6 +126,13 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 	// 设置session
 	sess := sessions.Default(ctx)
 	sess.Set("UserId", datas_u.Id)
+	sess.Options(sessions.Options{
+		MaxAge:   10 * 60, // 10分钟，按你的需求设置
+		Path:     "/",     // 确保路径匹配，避免多个 Cookie 冲突
+		Domain:   "127.0.0.1", // 明确域名，与请求一致
+		HttpOnly: true,
+		Secure:   false,   // 本地开发关闭 Secure
+	})
 	sess.Save()
 
 	ctx.String(http.StatusOK, "登录成功")
@@ -191,4 +198,26 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 
 func (u *UserHandle) Profile(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "这是profile")
+}
+
+func (u *UserHandle) Logout(ctx *gin.Context) {
+	// 1. 获取当前会话
+	sess := sessions.Default(ctx)
+	
+	// 2. 清除会话中的用户信息（关键步骤）
+	sess.Delete("UserId") // 删除存储的用户ID
+	
+	// 可选：设置会话立即过期（彻底销毁会话）
+	// sess.Options(sessions.Options{
+	// 	MaxAge: -1, // MaxAge=-1 表示立即过期
+	// })
+
+	// 3. 保存会话状态（必须调用，否则删除操作不生效）
+	if err := sess.Save(); err != nil {
+		ctx.String(http.StatusOK, "退出登录失败")
+		return
+	}
+
+	ctx.String(http.StatusOK, "退出登录成功")
+	fmt.Printf("UserId: %d\n", sess.Get("UserId"))
 }
