@@ -17,7 +17,7 @@ services:
   redis:
     image: 'bitnami/redis:latest'
     environment:
-      - REDIS_PASSWORD=your_redis_password  # 替换为你的密码
+      - REDIS_PASSWORD=redis  # 替换为你的密码
     volumes:
       # Redis数据持久化卷（核心：容器内数据目录映射到命名卷）
       - redis_data:/data  # /data是Redis容器内默认数据目录
