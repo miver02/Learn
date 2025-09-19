@@ -16,7 +16,7 @@ services:
   redis:
     image: 'bitnami/redis:latest'
     environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_PASSWORD=redis
     ports:
       - '8000:6379'  # Redis默认端口是6379，容器内必须映射6379
 
