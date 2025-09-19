@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"github.com/gin-contrib/sessions"
 
 	"github.com/miver02/Learn/go/webook/internal/repository/dao"
 	"github.com/miver02/Learn/go/webook/internal/web"
@@ -21,10 +21,10 @@ func main() {
 	api := gin.Default()
 
 	api.Use(sessions.Sessions("mysession", rdb))
-	// 网络层: 跨域; 会话;
+	// 网络层: 跨域; 会话; 路由拦截;
 	api = web.NewMiddlewareBuilder().InitCors(api)
 	api = web.NewMiddlewareBuilder().InitSess(api)
-	// api = web.NewMiddlewareBuilder().LoginMiddleWareMiddlewareBuilder(api)
+	api = web.NewMiddlewareBuilder().LoginMiddleWareMiddlewareBuilder(api)
 
 	// 路由层
 	api = web.RegisterRoutes(db, api)
@@ -49,7 +49,7 @@ func InitDB() *gorm.DB {
 }
 
 func InitRedis() redis.Store {
-	store, err := redis.NewStore(16, "tcp", "10.101.0.95:40019", "", "secret")
+	store, err := redis.NewStore(16, "tcp", "10.101.0.95:40019", "", "redis", []byte("secret"))
 	if err != nil {
 		panic("Redis 连接失败: " + err.Error())
 	}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/miver02/Learn/go/webook/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -39,6 +40,18 @@ func NewUserDAO(db *gorm.DB) *UserDAO {
 		db: db,
 	}
 }
+
+func (dao *UserDAO) InsertUserInfo(ctx context.Context, new_ud domain.User) error {
+	updates := map[string]interface{}{
+		"name":         new_ud.Name,
+		"birthday":     new_ud.Birthday,
+		"introduction": new_ud.Introduction,
+	}
+	err := dao.db.WithContext(ctx).Model(&User{}).Where("id = ?", new_ud.Id).
+		Updates(updates).Error
+	return err
+}
+	
 
 func (dao *UserDAO) FindByEmail(ctx context.Context, email string) (User, error) {
 	var ud User

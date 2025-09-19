@@ -81,8 +81,8 @@ func (u *UserHandle) SignUp(ctx *gin.Context) {
 
 	// 调用一下svc的方法
 	err = u.svc.SignUp(ctx, domain.User{
-		Email: req.Email,
-		Password: req.Password,
+		Email: 		req.Email,
+		Password: 	req.Password,
 	})
 	if err == service.ErrUserDuplicateEmail {
 		ctx.String(http.StatusOK, err.Error())
@@ -163,6 +163,25 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 
 	if utf8.RuneCountInString(req.Introduction) > 20 {
 		ctx.String(http.StatusOK, "个人简介内容太多")
+		return
+	}
+	
+	sess := sessions.Default(ctx)
+	idVal := sess.Get("UserId")
+	id, ok := idVal.(int64)
+	if !ok {
+		ctx.String(http.StatusUnauthorized, "未登录或会话失效")
+		return
+	}
+	err = u.svc.Edit(ctx, domain.User{
+		Id:           id,
+		Name:         req.Name,
+		Birthday:     req.Birthday,
+		Introduction: req.Introduction,
+	})
+	
+	if err != nil {
+		ctx.String(http.StatusUnauthorized, "个人信息补充失败")
 		return
 	}
 

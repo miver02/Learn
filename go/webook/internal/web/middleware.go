@@ -2,6 +2,7 @@ package web
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -54,8 +55,12 @@ func (mb *MiddlewareBuilder) LoginMiddleWareMiddlewareBuilder(api *gin.Engine) *
 			return
 		}
 
-		ssid := sessions.Default(ctx)
-		if id := ssid.Get("userId"); id == nil {
+		sess := sessions.Default(ctx)
+		id := sess.Get("UserId");
+		// 打印会话 ID 和 userId，查看是否为空
+		fmt.Printf("会话ID: %s\n", sess.ID())
+		fmt.Printf("userId: %v\n", id)
+		if id == nil {
 			// 没有登陆
 			ctx.AbortWithError(http.StatusUnauthorized, errors.New("未登录会话"))
 			return
@@ -63,3 +68,5 @@ func (mb *MiddlewareBuilder) LoginMiddleWareMiddlewareBuilder(api *gin.Engine) *
 	})
 	return api
 }
+
+

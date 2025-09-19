@@ -23,6 +23,14 @@ func NewUserRepository(dao *dao.UserDAO) *UserRepository {
 	}
 }
 
+func (r *UserRepository) InsertUserInfo(ctx context.Context,new_ud domain.User) (error) {
+	err := r.dao.InsertUserInfo(ctx, new_ud)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.User, error) {
 	ud, err := r.dao.FindByEmail(ctx, email)
 	if err != nil {

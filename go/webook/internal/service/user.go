@@ -26,6 +26,17 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 	}
 }
 
+
+func (svc *UserService) Edit(ctx context.Context, new_udo domain.User) (error) {
+	err := svc.repo.InsertUserInfo(ctx, new_udo)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
+
 func (svc *UserService) Login(ctx context.Context, new_udo domain.User) (domain.User, error) {
 	// 找用户
 	datas_u, err := svc.repo.FindByEmail(ctx, new_udo.Email)
