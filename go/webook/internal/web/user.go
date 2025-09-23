@@ -100,7 +100,7 @@ func (u *UserHandle) SignUp(ctx *gin.Context) {
 	// 数据库操作
 }
 
-/*
+
 func (u *UserHandle) LoginSession(ctx *gin.Context) {
 	type LoginReq struct {
 		Email		string `json:"email"`
@@ -140,9 +140,9 @@ func (u *UserHandle) LoginSession(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "登录成功")
 	fmt.Printf("%v\n", req)
 }
-*/
 
-func (u *UserHandle) Login(ctx *gin.Context) {
+
+func (u *UserHandle) LoginJwt(ctx *gin.Context) {
 	type LoginReq struct {
 		Email		string `json:"email"`
 		Password 	string `json:"password"`
@@ -173,7 +173,7 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 		ctx.String(http.StatusInternalServerError, "系统错误")
 		return
 	}
-	println(tokenStr)
+	ctx.Header("x-jwt-token", tokenStr)
 	ctx.String(http.StatusOK, "登录成功")
 	fmt.Printf("%v\n", req)
 }
@@ -259,3 +259,5 @@ func (u *UserHandle) Logout(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "退出登录成功")
 	fmt.Printf("UserId: %d\n", sess.Get("UserId"))
 }
+
+

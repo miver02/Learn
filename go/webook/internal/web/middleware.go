@@ -11,6 +11,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type MiddlewareBuilder struct {
@@ -20,13 +21,13 @@ func NewMiddlewareBuilder() *MiddlewareBuilder {
 	return &MiddlewareBuilder{}
 }
 
-func (mb *MiddlewareBuilder) InitCors(api *gin.Engine) *gin.Engine {
+func (mb *MiddlewareBuilder) InitCors(api *gin.Engine) {
 	// 解决跨域问题
 	api.Use(cors.New(cors.Config{
 		// AllowOrigins:     []string{"https://foo.com"},
 		// AllowMethods:     []string{"PUT", "PATCH"},
 		AllowHeaders: []string{"Content-Type", "Authorization"},
-		// ExposeHeaders:    []string{"Content-Length"},
+		ExposeHeaders:    []string{"x-jwt-token"},	// 不加这个,前端拿不到token
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
 			if strings.HasPrefix(origin, "http://localhost") {
@@ -36,18 +37,15 @@ func (mb *MiddlewareBuilder) InitCors(api *gin.Engine) *gin.Engine {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
-
-	return api
 }
 
-func (mb *MiddlewareBuilder) InitSess(api *gin.Engine) *gin.Engine {
+func (mb *MiddlewareBuilder) InitSess(api *gin.Engine) {
 	// 配置会话中间件
 	store := cookie.NewStore([]byte("secret"))
 	api.Use(sessions.Sessions("mysession", store))
-	return api
 }
 
-func (mb *MiddlewareBuilder) LoginMiddleWareMiddlewareBuilder(api *gin.Engine) *gin.Engine {
+func (mb *MiddlewareBuilder) LoginMiddleWareSessionBuilder(api *gin.Engine) {
 	// 注册登录效验
 	api.Use(func(ctx *gin.Context) {
 		if ctx.Request.URL.Path == "/users/login" ||
@@ -62,9 +60,6 @@ func (mb *MiddlewareBuilder) LoginMiddleWareMiddlewareBuilder(api *gin.Engine) *
 			ctx.AbortWithError(http.StatusUnauthorized, errors.New("未登录会话"))
 			return
 		}
-		// 打印会话 ID 和 userId，查看是否为空
-		fmt.Printf("会话ID: %s\n", sess.ID())
-		fmt.Printf("userid: %v\n", idVal)
 
 		// 1. 无论是否首次访问，都显式设置 MaxAge（核心修正）
 		sess.Options(sessions.Options{
@@ -92,7 +87,49 @@ func (mb *MiddlewareBuilder) LoginMiddleWareMiddlewareBuilder(api *gin.Engine) *
 		if err := sess.Save(); err != nil {
 			// 处理保存错误
 			ctx.AbortWithError(http.StatusUnauthorized, errors.New("会话保存失败"))
+			return
 		}
+
+		// 打印会话 ID 和 userId，查看是否为空
+		fmt.Printf("会话校验:会话ID: %s, userid: %v\n", sess.ID(), idVal)
 	})
-	return api
+}
+
+
+func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
+	api.Use(func(ctx *gin.Context) {
+		if ctx.Request.URL.Path == "/users/login" ||
+			ctx.Request.URL.Path == "/users/signup" {
+			return
+		}
+
+		tokenHeader := ctx.GetHeader("Authorization")
+		if tokenHeader == "" {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		segs := strings.Split(tokenHeader, " ")
+		if len(segs) != 2 {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return 
+		}
+
+		token := segs[1]
+		tokenStr, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+			return []byte("secret"), nil
+		})
+
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		if tokenStr == nil || !tokenStr.Valid {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		fmt.Printf("Jwt校验\n")
+	})
 }

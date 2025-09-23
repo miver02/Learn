@@ -21,10 +21,13 @@ func main() {
 	api := gin.Default()
 
 	api.Use(sessions.Sessions("mysession", rdb))
-	// 网络层: 跨域; 会话; 路由拦截;
-	api = web.NewMiddlewareBuilder().InitCors(api)
-	api = web.NewMiddlewareBuilder().InitSess(api)
-	api = web.NewMiddlewareBuilder().LoginMiddleWareMiddlewareBuilder(api)
+	// 网络层: 跨域; 会话;
+	web.NewMiddlewareBuilder().InitCors(api)
+	web.NewMiddlewareBuilder().InitSess(api)
+
+	// 注册登录效验
+	// web.NewMiddlewareBuilder().LoginMiddleWareSessionBuilder(api)
+	web.NewMiddlewareBuilder().LoginMiddleWareJwtBuilder(api)
 
 	// 路由层
 	api = web.RegisterRoutes(db, api)
