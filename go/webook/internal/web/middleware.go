@@ -115,8 +115,10 @@ func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 			return 
 		}
 
-		token := segs[1]
-		tokenStr, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		tokenStr := segs[1]
+		// 提取token中的参数,一定要传入指针
+		claims := &UserClaims{}
+		token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte("secret"), nil
 		})
 
@@ -125,11 +127,24 @@ func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 			return
 		}
 
-		if tokenStr == nil || !tokenStr.Valid {
+		// jwt过期了,token.Valid会变为False
+		if token == nil || !token.Valid || claims.Uid == 0{
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		fmt.Printf("Jwt校验\n")
+		// 刷新jwt
+		now := time.Now()
+		if claims.ExpiresAt.Sub(now) < time.Second*50 {
+			claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute))
+			tokenStr, err := token.SignedString([]byte("secret"))
+			if err != nil {
+				ctx.String(http.StatusOK, err.Error())
+			}
+			ctx.Header("x-jwt-token", "Bearer " + tokenStr)
+		}
+
+		ctx.Set("claims", claims)
+		fmt.Printf("Jwt校验:uid: %d\n", claims.Uid)
 	})
 }
