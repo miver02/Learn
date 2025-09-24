@@ -26,8 +26,8 @@ func (mb *MiddlewareBuilder) InitCors(api *gin.Engine) {
 	api.Use(cors.New(cors.Config{
 		// AllowOrigins:     []string{"https://foo.com"},
 		// AllowMethods:     []string{"PUT", "PATCH"},
-		AllowHeaders: []string{"Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"x-jwt-token"},	// 不加这个,前端拿不到token
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"x-jwt-token"}, // 不加这个,前端拿不到token
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
 			if strings.HasPrefix(origin, "http://localhost") {
@@ -63,17 +63,17 @@ func (mb *MiddlewareBuilder) LoginMiddleWareSessionBuilder(api *gin.Engine) {
 
 		// 1. 无论是否首次访问，都显式设置 MaxAge（核心修正）
 		sess.Options(sessions.Options{
-			MaxAge:   10 * 60, // 10分钟，按你的需求设置
-			Path:     "/",     // 确保路径匹配，避免多个 Cookie 冲突
+			MaxAge:   10 * 60,     // 10分钟，按你的需求设置
+			Path:     "/",         // 确保路径匹配，避免多个 Cookie 冲突
 			Domain:   "127.0.0.1", // 明确域名，与请求一致
 			HttpOnly: true,
-			Secure:   false,   // 本地开发关闭 Secure
+			Secure:   false, // 本地开发关闭 Secure
 		})
-		
+
 		// 2. 处理 update_time 逻辑（保持你的业务逻辑）
 		now := time.Now().UnixMilli()
 		updateTime := sess.Get("update_time")
-		
+
 		if updateTime == nil {
 			sess.Set("update_time", now)
 		} else {
@@ -95,7 +95,6 @@ func (mb *MiddlewareBuilder) LoginMiddleWareSessionBuilder(api *gin.Engine) {
 	})
 }
 
-
 func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 	api.Use(func(ctx *gin.Context) {
 		if ctx.Request.URL.Path == "/users/login" ||
@@ -112,7 +111,7 @@ func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 		segs := strings.Split(tokenHeader, " ")
 		if len(segs) != 2 {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
-			return 
+			return
 		}
 
 		tokenStr := segs[1]
@@ -128,7 +127,13 @@ func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 		}
 
 		// jwt过期了,token.Valid会变为False
-		if token == nil || !token.Valid || claims.Uid == 0{
+		if token == nil || !token.Valid || claims.Uid == 0 {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		if claims.UserAgent != ctx.Request.UserAgent() {
+			// 严重的安全问题,需要记录日志
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
@@ -141,7 +146,7 @@ func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 			if err != nil {
 				ctx.String(http.StatusOK, err.Error())
 			}
-			ctx.Header("x-jwt-token", "Bearer " + tokenStr)
+			ctx.Header("x-jwt-token", "Bearer "+tokenStr)
 		}
 
 		ctx.Set("claims", claims)

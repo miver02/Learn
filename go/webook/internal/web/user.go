@@ -19,28 +19,27 @@ import (
 
 // user相关路由定义
 type UserHandle struct {
-	svc 	*service.UserService
+	svc      *service.UserService
 	emailExp *regexp.Regexp
-	pwdExp *regexp.Regexp
+	pwdExp   *regexp.Regexp
 }
 
 func NewUserHandle(svc *service.UserService) *UserHandle {
 	emailExp := regexp.MustCompile(emailRegexPattern, regexp.None)
 	pwdExp := regexp.MustCompile(passwordRegexPattern, regexp.None)
 	return &UserHandle{
-		svc: svc,
+		svc:      svc,
 		emailExp: emailExp,
-		pwdExp: pwdExp,
+		pwdExp:   pwdExp,
 	}
 }
 
-
 func (u *UserHandle) SignUp(ctx *gin.Context) {
-	type SignUpReq struct{
+	type SignUpReq struct {
 		// 内部结构体
-		Email 			string `json:"email"`
+		Email           string `json:"email"`
 		ConfirmPassword string `json:"confirmPassword"`
-		Password 		string `json:"password"`
+		Password        string `json:"password"`
 	}
 
 	var req SignUpReq
@@ -62,7 +61,6 @@ func (u *UserHandle) SignUp(ctx *gin.Context) {
 		return
 	}
 
-
 	// 密码效验
 	if req.ConfirmPassword != req.Password {
 		ctx.String(http.StatusOK, "两次输入的密码不一致")
@@ -82,8 +80,8 @@ func (u *UserHandle) SignUp(ctx *gin.Context) {
 
 	// 调用一下svc的方法
 	err = u.svc.SignUp(ctx, domain.User{
-		Email: 		req.Email,
-		Password: 	req.Password,
+		Email:    req.Email,
+		Password: req.Password,
 	})
 	if err == service.ErrUserDuplicateEmail {
 		ctx.String(http.StatusOK, err.Error())
@@ -190,8 +188,8 @@ func (u *UserHandle) LoginJwt(ctx *gin.Context) {
 
 func (u *UserHandle) Login(ctx *gin.Context) {
 	type LoginReq struct {
-		Email		string `json:"email"`
-		Password 	string `json:"password"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	var req LoginReq
@@ -200,8 +198,8 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 	}
 
 	datas_u, err := u.svc.Login(ctx, domain.User{
-		Email: 		req.Email,
-		Password: 	req.Password,
+		Email:    req.Email,
+		Password: req.Password,
 	})
 	if err == service.ErrInvalidUserOrPassword {
 		ctx.String(http.StatusOK, err.Error())
@@ -212,18 +210,18 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 		return
 	}
 
-	/* 
-	// 设置session
-	sess := sessions.Default(ctx)
-	sess.Set("UserId", datas_u.Id)
-	sess.Options(sessions.Options{
-		MaxAge:   10 * 60, // 10分钟，按你的需求设置
-		Path:     "/",     // 确保路径匹配，避免多个 Cookie 冲突
-		Domain:   "127.0.0.1", // 明确域名，与请求一致
-		HttpOnly: true,
-		Secure:   false,   // 本地开发关闭 Secure
-	})
-	sess.Save()
+	/*
+		// 设置session
+		sess := sessions.Default(ctx)
+		sess.Set("UserId", datas_u.Id)
+		sess.Options(sessions.Options{
+			MaxAge:   10 * 60, // 10分钟，按你的需求设置
+			Path:     "/",     // 确保路径匹配，避免多个 Cookie 冲突
+			Domain:   "127.0.0.1", // 明确域名，与请求一致
+			HttpOnly: true,
+			Secure:   false,   // 本地开发关闭 Secure
+		})
+		sess.Save()
 	*/
 
 	// JWT
@@ -231,7 +229,8 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
 		},
-		Uid: datas_u.Id,
+		Uid:       datas_u.Id,
+		UserAgent: ctx.Request.UserAgent(),
 	}
 	// 使你的token携带参数
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
@@ -240,26 +239,25 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 		ctx.String(http.StatusInternalServerError, "系统错误")
 		return
 	}
-	ctx.Header("x-jwt-token", tokenStr)
+	ctx.Header("x-jwt-token", "Bearer "+tokenStr)
 
 	ctx.String(http.StatusOK, "登录成功")
 	fmt.Printf("%v\n", req)
 }
 
-
 func (u *UserHandle) Edit(ctx *gin.Context) {
 	type EditReq struct {
-		Name 			string 	`json:"name"`
-		Birthday 		string	`json:"birthday"`
-		Introduction 	string 	`json:"introduction"`
+		Name         string `json:"name"`
+		Birthday     string `json:"birthday"`
+		Introduction string `json:"introduction"`
 	}
-	
+
 	var req EditReq
 	// 提取数据
 	if err := ctx.Bind(&req); err != nil {
 		ctx.String(http.StatusOK, "参数格式错误")
 		fmt.Printf("%v\n", err)
-		return 
+		return
 	}
 
 	_, err := time.Parse("2006-01-02", req.Birthday)
@@ -278,7 +276,7 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "个人简介内容太多")
 		return
 	}
-	
+
 	sess := sessions.Default(ctx)
 	idVal := sess.Get("UserId")
 	id, ok := idVal.(int64)
@@ -292,7 +290,7 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 		Birthday:     req.Birthday,
 		Introduction: req.Introduction,
 	})
-	
+
 	if err != nil {
 		ctx.String(http.StatusUnauthorized, "个人信息补充失败")
 		return
@@ -301,7 +299,6 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "个人信息补充成功")
 	fmt.Printf("%v\n", req)
 }
-
 
 func (u *UserHandle) Profile(ctx *gin.Context) {
 	uc, _ := ctx.Get("claims")
@@ -314,7 +311,7 @@ func (u *UserHandle) Profile(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "系统错误")
 		return
 	}
-	
+
 	ctx.String(http.StatusOK, "这是profile")
 	fmt.Printf("uid: %d\n", claims.Uid)
 }
@@ -322,10 +319,10 @@ func (u *UserHandle) Profile(ctx *gin.Context) {
 func (u *UserHandle) LogoutSession(ctx *gin.Context) {
 	// 1. 获取当前会话
 	sess := sessions.Default(ctx)
-	
+
 	// 2. 清除会话中的用户信息（关键步骤）
 	sess.Delete("UserId") // 删除存储的用户ID
-	
+
 	// 可选：设置会话立即过期（彻底销毁会话）
 	// sess.Options(sessions.Options{
 	// 	MaxAge: -1, // MaxAge=-1 表示立即过期
@@ -341,9 +338,9 @@ func (u *UserHandle) LogoutSession(ctx *gin.Context) {
 	fmt.Printf("UserId: %d\n", sess.Get("UserId"))
 }
 
-
 type UserClaims struct {
 	// token携带参数接口
 	jwt.RegisteredClaims
-	Uid int64
+	Uid       int64
+	UserAgent string
 }
