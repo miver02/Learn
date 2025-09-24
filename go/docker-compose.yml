@@ -5,8 +5,6 @@ services:
     container_name: go-learning-env
     volumes:
       - ./:/go/src/app
-      - /var/run/docker.sock:/var/run/docker.sock   # 挂载 Docker 套接字
-      - /usr/bin/docker:/usr/bin/docker             # 挂载 docker 命令（可选）
     tty: true
     stdin_open: true
     restart: unless-stopped
