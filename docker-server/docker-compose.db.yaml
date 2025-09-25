@@ -1,7 +1,7 @@
 services:
   # MySQL服务（带数据持久化）
   mysql8:
-    image: zll/mysql:8.0.29
+    image: mysql:8.0.29
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -15,7 +15,7 @@ services:
 
   # Redis服务（带数据持久化）
   redis:
-    image: 'zll/redis:latest'
+    image: 'bitnami/redis:latest'
     restart: always
     environment:
       - REDIS_PASSWORD=redis  # 替换为你的密码
