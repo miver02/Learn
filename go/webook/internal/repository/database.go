@@ -9,6 +9,7 @@ import (
 	redis "github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/miver02/Learn/go/webook/internal/repository/dao"
+	"github.com/miver02/Learn/go/webook/internal/consts"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -23,7 +24,8 @@ func NewInitDatebase() *InitDatebase {
 // 连接 mysql
 func (idb *InitDatebase) InitDB() *gorm.DB {
 	// 数据库连接
-	db, err := gorm.Open(mysql.Open("root:root@tcp(10.101.0.95:40018)/webook?charset=utf8mb4&parseTime=True&loc=Local"))
+	dsn := consts.MysqlUser + ":" + consts.MysqlPassword + "@tcp(" + consts.MysqlAddr + ")/" + consts.MysqlDatabase + "?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn))
 	if err != nil {
 		// panic相当于整个goroutine结束
 		panic("数据库连接失败: " + err.Error())
@@ -38,7 +40,7 @@ func (idb *InitDatebase) InitDB() *gorm.DB {
 
 // 连接redis
 func (idb *InitDatebase) InitRedis() redis.Store {
-	store, err := redis.NewStore(16, "tcp", "10.101.0.95:40019", "", "redis", []byte("secret"))
+	store, err := redis.NewStore(16, "tcp", consts.RedisAddr, consts.RedisUser, consts.RedisPassword, []byte(consts.KeyPairs))
 	if err != nil {
 		panic("Redis 连接失败: " + err.Error())
 	}
@@ -48,8 +50,8 @@ func (idb *InitDatebase) InitRedis() redis.Store {
 // 实现redis限流
 func (idb *InitDatebase) InitRateLimit(api *gin.Engine) {
 	rc := redisClient.NewClient(&redisClient.Options{
-		Addr:     "10.101.0.95:40019",
-		Password: "redis",
+		Addr:     consts.RedisAddr,
+		Password: consts.RedisPassword,
 	})
 	api.Use(ratelimit.NewBuilder(rc, time.Second, 100).Build())
 

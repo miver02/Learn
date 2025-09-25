@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/miver02/Learn/go/webook/internal/domain"
 	"github.com/miver02/Learn/go/webook/internal/service"
+	"github.com/miver02/Learn/go/webook/internal/consts"
 )
 
 // var ErrUserDuplicateEmail = service.ErrUserDuplicateEmail
@@ -25,8 +26,8 @@ type UserHandle struct {
 }
 
 func NewUserHandle(svc *service.UserService) *UserHandle {
-	emailExp := regexp.MustCompile(emailRegexPattern, regexp.None)
-	pwdExp := regexp.MustCompile(passwordRegexPattern, regexp.None)
+	emailExp := regexp.MustCompile(consts.EmailRegexPattern, regexp.None)
+	pwdExp := regexp.MustCompile(consts.PasswordRegexPattern, regexp.None)
 	return &UserHandle{
 		svc:      svc,
 		emailExp: emailExp,
