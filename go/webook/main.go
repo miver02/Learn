@@ -33,7 +33,7 @@ func main() {
 	api = web.RegisterRoutes(db, api)
 */
 	api.GET("/hello", func(ctx *gin.Context)  {
-		ctx.String(http.StatusOK, "你好,k8s")
+		ctx.String(http.StatusOK, "你好,k8s\n")
 	})
 	// 启动地址
 	api.Run(":8001")
