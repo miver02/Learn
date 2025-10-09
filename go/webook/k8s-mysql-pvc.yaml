@@ -1,0 +1,12 @@
+# 配置mysql
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: webook-mysql-claim
+spec:
+  storageClassName: suibian
+  accessModes:
+    - ReadWriteOnce # 权限: 一个pod读写
+  resources:
+    requests:
+      storage: 1Gi # 储存: 1GB

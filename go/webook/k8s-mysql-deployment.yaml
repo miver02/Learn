@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webook-mysql
+spec:
+# 副本数量
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webook-mysql
+# 描述POD
+  template:
+    metadata:
+      labels:
+        app: webook-mysql
+# POD具体信息
+    spec:
+      containers:
+        - name: webook-mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+            # 指向volume中的卷,具体使用哪个卷
+              name: mysql-storage
+          ports:
+            - containerPort: 3306
+      restartPolicy: Always
+      volumes:
+      # 可以有很多卷
+        - name: mysql-storage
+          persistentVolumeClaim:
+          # 设置mysql权限内存等
+            claimName: webook-mysql-claim
+            
