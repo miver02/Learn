@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webook-redis
+spec:
+# 副本数量
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webook-redis
+# 描述POD
+  template:
+    metadata:
+      labels:
+        app: webook-redis
+# POD具体信息
+    spec:
+      containers:
+        - name: webook-redis
+          image: redis:latest
+          env:
+            - name: REDIS_PASSWORD
+              value: redis
+          imagePullPolicy: IfNotPresent
+      #     volumeMounts:
+      #       - mountPath: /var/lib/mysql
+      #       # 指向volume中的卷,具体使用哪个卷
+      #         name: mysql-storage
+      #     ports:
+      #       - containerPort: 6379
+      # restartPolicy: Always
+      # volumes:
+      # # 可以有很多卷
+      #   - name: mysql-storage
+      #     persistentVolumeClaim:
+      #     # 设置mysql权限内存等
+      #       claimName: webook-mysql-claim
+            
