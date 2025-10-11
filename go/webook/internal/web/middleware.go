@@ -140,7 +140,7 @@ func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 
 		// 刷新jwt
 		now := time.Now()
-		if claims.ExpiresAt.Sub(now) < time.Second*50 {
+		if claims.ExpiresAt.Sub(now) < time.Second*30 {
 			claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute))
 			tokenStr, err := token.SignedString([]byte("secret"))
 			if err != nil {
