@@ -278,6 +278,8 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 		return
 	}
 
+	/*
+	// 不单独使用session，而是使用jwt
 	sess := sessions.Default(ctx)
 	idVal := sess.Get("UserId")
 	id, ok := idVal.(int64)
@@ -285,8 +287,22 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 		ctx.String(http.StatusUnauthorized, "未登录或会话失效")
 		return
 	}
+	*/
+	
+	// 获取jwt的claims
+	claimsVal, ok := ctx.Get("claims")
+	if !ok {
+		ctx.String(http.StatusUnauthorized, "未登录或会话失效")
+		return
+	}
+	claims, ok := claimsVal.(*UserClaims)
+	if !ok {
+		ctx.String(http.StatusUnauthorized, "系统错误")
+		return
+	}
+
 	err = u.svc.Edit(ctx, domain.User{
-		Id:           id,
+		Id:           claims.Uid,
 		Name:         req.Name,
 		Birthday:     req.Birthday,
 		Introduction: req.Introduction,
