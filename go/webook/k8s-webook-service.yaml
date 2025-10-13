@@ -7,7 +7,7 @@ spec:
     app: webook
   ports:
     - protocol: TCP
-      port: 8001
+      port: 80
       targetPort: 8001
       nodePort: 30081
   type: LoadBalancer 

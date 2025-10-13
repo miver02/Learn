@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: webook
-          image: miver02/webook:v0.0.1
-          ports:
-            - containerPort: 8001
+          image: miver02/webook:v1.0.0
+          imagePullPolicy: Never 
+       
             
