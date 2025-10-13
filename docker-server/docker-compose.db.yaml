@@ -25,7 +25,20 @@ services:
     ports:
       - '6379:6379'
 
+  gva_test:
+    image: mysql:8.0.29
+    container_name: gva-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Sspaas@1233
+    volumes:
+      # MySQL数据持久化卷（核心：将数据目录映射到宿主机或命名卷）
+      - gva_test_data:/var/lib/mysql  # /var/lib/mysql是MySQL容器内默认数据目录
+    ports:
+      - "3307:3307"
+
 # 声明命名卷（用于存储MySQL和Redis的数据，独立于容器生命周期）
 volumes:
   mysql_data:  # MySQL数据卷
   redis_data:  # Redis数据卷
+  gva_test_data: # gva测试数据卷
