@@ -21,6 +21,8 @@ spec:
           env:
             - name: REDIS_PASSWORD
               value: redis
+          # 添加命令行参数，让redis加载密码配置
+          command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
           imagePullPolicy: IfNotPresent
       #     volumeMounts:
       #       - mountPath: /var/lib/mysql
