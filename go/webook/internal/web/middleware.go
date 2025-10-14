@@ -33,6 +33,9 @@ func (mb *MiddlewareBuilder) InitCors(api *gin.Engine) {
 			if strings.HasPrefix(origin, "http://localhost") {
 				return true
 			}
+			if strings.HasPrefix(origin, "live.webook.com") {
+				return true
+			}
 			return strings.Contains(origin, "xxx.com'")
 		},
 		MaxAge: 12 * time.Hour,
