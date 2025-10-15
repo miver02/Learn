@@ -18,7 +18,7 @@ func main() {
 	// 数据库层
 	db := repository.NewInitDatebase().InitDB()
 	rdb := repository.NewInitDatebase().InitRedis()
-	repository.NewInitDatebase().InitRateLimit(api)	// 注册redis限流
+	// repository.NewInitDatebase().InitRateLimit(api)	// 注册redis限流
 	api.Use(sessions.Sessions("mysession", rdb))
 
 	// 网络层: 跨域; 会话;

@@ -228,7 +228,7 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 	// JWT
 	claims := UserClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
 		},
 		Uid:       datas_u.Id,
 		UserAgent: ctx.Request.UserAgent(),

@@ -9,13 +9,13 @@ const (
 // 数据库配置
 const (
 	// mysql
-	MysqlAddr 		= `live.webook.com:3316`
+	MysqlAddr 		= `127.0.0.1:3306`
 	MysqlUser	 	= `root`
 	MysqlPassword  	= `root`
 	MysqlDatabase		= `webook`
 
 	// redis
-	RedisAddr 		= `live.webook.com:6380`
+	RedisAddr 		= `127.0.0.1:6379`
 	RedisUser		= ``
 	RedisPassword  	= `redis`
 
