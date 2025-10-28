@@ -2,17 +2,18 @@
 package web
 
 import (
-
 	"github.com/gin-gonic/gin"
 	"github.com/miver02/Learn/go/webook/internal/repository"
+	"github.com/miver02/Learn/go/webook/internal/repository/cache"
 	"github.com/miver02/Learn/go/webook/internal/repository/dao"
 	"github.com/miver02/Learn/go/webook/internal/service"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(db *gorm.DB, api *gin.Engine) *gin.Engine {
+func RegisterRoutes(db *gorm.DB, redisClient redis.Cmdable, api *gin.Engine) *gin.Engine {
 	// 初始化user
-	svc := InitUser(db)
+	svc := InitUser(db, redisClient)
 
 	// 注册用户路由
 	RegisterUserRoutes(api, svc)
@@ -20,9 +21,10 @@ func RegisterRoutes(db *gorm.DB, api *gin.Engine) *gin.Engine {
 	return api
 }
 
-func InitUser(db *gorm.DB) *service.UserService {
+func InitUser(db *gorm.DB, redisClient redis.Cmdable) *service.UserService {
 	ud := dao.NewUserDAO(db)
-	repo := repository.NewUserRepository(ud)
+	userCache := cache.NewUserCache(redisClient)
+	repo := repository.NewUserRepository(ud, userCache)
 	svc := service.NewUserService(repo)
 	return svc
 }

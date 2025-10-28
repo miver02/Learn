@@ -74,4 +74,9 @@ func (dao *UserDAO) Insert(ctx context.Context, u User) error {
 	return err
 }
 
+func (dao *UserDAO) FindById(ctx context.Context, id int64) (User, error) {
+	var ud User
+	err := dao.db.WithContext(ctx).Where("id = ?", id).Find(&ud).Error
+	return ud, err
+}
 
