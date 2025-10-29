@@ -26,7 +26,6 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 	}
 }
 
-
 func (svc *UserService) Edit(ctx context.Context, new_udo domain.User) (error) {
 	err := svc.repo.InsertUserInfo(ctx, new_udo)
 	if err != nil {
@@ -34,8 +33,6 @@ func (svc *UserService) Edit(ctx context.Context, new_udo domain.User) (error) {
 	}
 	return nil
 }
-
-
 
 func (svc *UserService) Login(ctx context.Context, new_udo domain.User) (domain.User, error) {
 	// 找用户
