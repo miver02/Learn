@@ -6,6 +6,7 @@ toolchain go1.24.8
 
 require (
 	github.com/dlclark/regexp2 v1.11.5
+	github.com/ecodeclub/ekit v0.0.10
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-contrib/sessions v1.0.4
 	github.com/gin-gonic/gin v1.11.0
@@ -26,7 +27,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/ecodeclub/ekit v0.0.10 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
