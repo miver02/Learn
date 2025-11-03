@@ -9,6 +9,7 @@ import (
 
 var (
 	ErrCodeSendTooMany = cache.ErrCodeSendTooMany
+	ErrVerityTooMany = cache.ErrVerityTooMany
 )
 	
 
@@ -21,5 +22,9 @@ func NewCodeRepository() *CodeRepository {
 }
 
 func (repo *CodeRepository) Store(ctx context.Context, biz, phone, code string) error {
-	return nil
+	return repo.cache.Set(ctx, biz, phone, code)
+}
+
+func (repo *CodeRepository) Verify(ctx context.Context, biz, phone, inputCode string) (bool, error) {
+	return repo.cache.Verify(ctx, biz, phone, inputCode)
 }

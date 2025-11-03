@@ -37,7 +37,7 @@ func (svc *CodeService) Send(ctx context.Context, biz string, code string, phone
 }
 
 func (svc *CodeService) Verify(ctx context.Context, biz string, code string, phone string, inputCode string) (bool, error) {
-	return true, nil
+	return svc.repo.Verify(ctx, biz, phone, inputCode)
 }
 
 func (svc *CodeService) generateCode() string {

@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 
@@ -11,12 +12,17 @@ import (
 
 var (
 	ErrCodeSendTooMany = errors.New("发送太频繁")
+	ErrVerityTooMany  = errors.New("验证次数太多")
+	ErrUnknown		= errors.New("未知错误")
 )
 	
 
 // 编译器在编译的时候,会把set_code的代码放进luaSetCode变量里
-//go.build lua/set_code.lua
+//go:embed lua/set_code.lua
 var luaSetCode string
+
+//go.embed lua/verify_code.lua
+var luaVerityCode string
 
 type CodeCache struct {
 	client redis.Cmdable
@@ -46,6 +52,24 @@ func (c *CodeCache) Set(ctx context.Context, biz, phone, code string) error {
 		return errors.New("系统错误")
 	}
 }
+
+func (c *CodeCache) Verify(ctx context.Context, biz, phone, inputCode string) (bool, error) {
+	res, err := c.client.Eval(ctx, luaVerityCode, []string{c.key(biz, phone)}, inputCode).Int()
+	if err != nil {
+		return false, ErrVerityTooMany
+	}
+	switch res {
+	case -1:
+		return false, nil
+	case 0:
+		return true, nil
+	case -2:
+		return false, nil
+	default:
+		return false, ErrUnknown
+	}
+}
+
 
 func (c *CodeCache) key(biz, phone string) string {
 	return fmt.Sprintf("phone_code:%s:%s", biz, phone)
