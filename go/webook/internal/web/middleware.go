@@ -100,9 +100,11 @@ func (mb *MiddlewareBuilder) LoginMiddleWareSessionBuilder(api *gin.Engine) {
 
 func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 	api.Use(func(ctx *gin.Context) {
-		if ctx.Request.URL.Path == "/users/login" ||
-			ctx.Request.URL.Path == "/users/signup" {
-			return
+		ignorePaths := []string{"/users/login", "/users/signup", "/users/login_sms/code/send", "/users/login_sms"}
+		for _, p := range ignorePaths {
+			if ctx.Request.URL.Path == p {
+				return
+			}
 		}
 
 		tokenHeader := ctx.GetHeader("Authorization")

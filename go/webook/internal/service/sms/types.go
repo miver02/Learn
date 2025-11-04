@@ -8,6 +8,10 @@ type Service interface {
 	SendV1(ctx context.Context, tpl string, args []NamedArg, numbers...string) error
 }
 
+func NewService(svc Service) Service {
+	return svc
+}
+
 type NamedArg struct {
 	Val string
 	Name string

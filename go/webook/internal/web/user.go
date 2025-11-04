@@ -11,9 +11,10 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/miver02/Learn/go/webook/internal/domain"
-	"github.com/miver02/Learn/go/webook/internal/service"
 	"github.com/miver02/Learn/go/webook/internal/consts"
+	"github.com/miver02/Learn/go/webook/internal/domain"
+	"github.com/miver02/Learn/go/webook/internal/model/response"
+	"github.com/miver02/Learn/go/webook/internal/service"
 )
 
 // var ErrUserDuplicateEmail = service.ErrUserDuplicateEmail
@@ -21,17 +22,19 @@ import (
 // user相关路由定义
 type UserHandle struct {
 	svc      *service.UserService
+	codeSvc  *service.CodeService
 	emailExp *regexp.Regexp
 	pwdExp   *regexp.Regexp
 }
 
-func NewUserHandle(svc *service.UserService) *UserHandle {
+func NewUserHandle(svc *service.UserService, codeSvc *service.CodeService) *UserHandle {
 	emailExp := regexp.MustCompile(consts.EmailRegexPattern, regexp.None)
 	pwdExp := regexp.MustCompile(consts.PasswordRegexPattern, regexp.None)
 	return &UserHandle{
 		svc:      svc,
 		emailExp: emailExp,
 		pwdExp:   pwdExp,
+		codeSvc:  codeSvc,
 	}
 }
 
@@ -246,6 +249,38 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 	fmt.Printf("%v\n", req)
 }
 
+func (u *UserHandle) SendLoginSmsCode(ctx *gin.Context) {
+	type Req struct {
+		Phone string `json:"phone"`
+	}
+	const biz = "login_sms"
+	var req Req
+	if err := ctx.Bind(&req); err != nil {
+		ctx.String(http.StatusOK, "参数格式错误")
+		fmt.Printf("%v\n", err)
+		return
+	}
+	err := u.codeSvc.Send(ctx, biz, req.Phone)
+	if err != nil {
+		ctx.JSON(http.StatusOK, response.Result{
+			Code: 401,
+			Msg:  "验证码发送失败",
+			Data: nil,
+		})
+		fmt.Printf("%v\n", err)
+		return
+	}
+	ctx.JSON(http.StatusOK, response.Result{
+		Code: 200,
+		Msg:  "验证码发送成功",
+		Data: nil,
+	})
+}
+
+func (u *UserHandle) LoginSms(ctx *gin.Context) {
+
+}
+
 func (u *UserHandle) Edit(ctx *gin.Context) {
 	type EditReq struct {
 		Name         string `json:"name"`
@@ -279,16 +314,16 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 	}
 
 	/*
-	// 不单独使用session，而是使用jwt
-	sess := sessions.Default(ctx)
-	idVal := sess.Get("UserId")
-	id, ok := idVal.(int64)
-	if !ok {
-		ctx.String(http.StatusUnauthorized, "未登录或会话失效")
-		return
-	}
+		// 不单独使用session，而是使用jwt
+		sess := sessions.Default(ctx)
+		idVal := sess.Get("UserId")
+		id, ok := idVal.(int64)
+		if !ok {
+			ctx.String(http.StatusUnauthorized, "未登录或会话失效")
+			return
+		}
 	*/
-	
+
 	// 获取jwt的claims
 	claimsVal, ok := ctx.Get("claims")
 	if !ok {

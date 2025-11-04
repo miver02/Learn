@@ -17,8 +17,10 @@ type CodeRepository struct {
 	cache *cache.CodeCache
 }
 
-func NewCodeRepository() *CodeRepository {
-	return nil
+func NewCodeRepository(codeCache *cache.CodeCache) *CodeRepository {
+	return &CodeRepository{
+		cache: codeCache,
+	}
 }
 
 func (repo *CodeRepository) Store(ctx context.Context, biz, phone, code string) error {
