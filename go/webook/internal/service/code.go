@@ -29,7 +29,7 @@ func NewCodeService(repo *repository.CodeRepository, smsSvc sms.Service) *CodeSe
 }
 
 // Send发送验证码
-func (svc *CodeService) Send(ctx context.Context, biz string, phone string) error {
+func (svc *CodeService) Send(ctx context.Context, biz string, phone string) (string, error) {
 	// code := "1234"
 	// serToRedis(code, key, time.Minute*10)
 	// 两个步骤, 生成一个验证码
@@ -37,14 +37,14 @@ func (svc *CodeService) Send(ctx context.Context, biz string, phone string) erro
 	// 塞进去 Redis
 	err := svc.repo.Store(ctx, biz, phone, code)
 	if err != nil {
-		return nil
+		return "", err
 	}
 	// 发送出去
 	err = svc.smsSvc.Send(ctx, codeTplId, []string{code}, phone)
-	return err
+	return code, err
 }
 
-func (svc *CodeService) Verify(ctx context.Context, biz string, code string, phone string, inputCode string) (bool, error) {
+func (svc *CodeService) Verify(ctx context.Context, biz string, phone string, inputCode string) (bool, error) {
 	return svc.repo.Verify(ctx, biz, phone, inputCode)
 }
 

@@ -106,7 +106,7 @@ func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 				return
 			}
 		}
-
+		
 		tokenHeader := ctx.GetHeader("Authorization")
 		if tokenHeader == "" {
 			ctx.AbortWithStatus(http.StatusUnauthorized)

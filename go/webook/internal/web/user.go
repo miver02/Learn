@@ -19,6 +19,10 @@ import (
 
 // var ErrUserDuplicateEmail = service.ErrUserDuplicateEmail
 
+const (
+	biz = "login_sms"
+)
+
 // user相关路由定义
 type UserHandle struct {
 	svc      *service.UserService
@@ -251,21 +255,20 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 
 func (u *UserHandle) SendLoginSmsCode(ctx *gin.Context) {
 	type Req struct {
-		Phone string `json:"phone"`
+		Phone string `json:"phone" form:"phone"`
 	}
-	const biz = "login_sms"
 	var req Req
 	if err := ctx.Bind(&req); err != nil {
 		ctx.String(http.StatusOK, "参数格式错误")
 		fmt.Printf("%v\n", err)
 		return
 	}
-	err := u.codeSvc.Send(ctx, biz, req.Phone)
+	code, err := u.codeSvc.Send(ctx, biz, req.Phone)
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.Result{
 			Code: 401,
 			Msg:  "验证码发送失败",
-			Data: nil,
+			Data: err,
 		})
 		fmt.Printf("%v\n", err)
 		return
@@ -273,12 +276,57 @@ func (u *UserHandle) SendLoginSmsCode(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response.Result{
 		Code: 200,
 		Msg:  "验证码发送成功",
-		Data: nil,
+		Data: code,
 	})
 }
 
 func (u *UserHandle) LoginSms(ctx *gin.Context) {
-
+	type Req struct {
+		Phone string `json:"phone" form:"phone"`
+		Code  string `json:"code" form:"code"`
+	}
+	var req Req
+	if err := ctx.Bind(&req); err != nil {
+		ctx.JSON(http.StatusOK, response.Result{
+			Code: 400,
+			Msg:  "参数格式错误",
+			Data: err,
+		})
+		fmt.Printf("解析参数失败：%v，req：%+v\n", err, req)
+		return
+	}
+	if req.Phone == "" {
+		ctx.JSON(http.StatusOK, response.Result{
+			Code: 400,
+			Msg:  "请求参数错误",
+			Data: req,
+		})
+		return
+	}
+	// 可以加各种数据效验
+	ok, err := u.codeSvc.Verify(ctx, biz, req.Phone, req.Code)
+	if err != nil {
+		ctx.JSON(http.StatusOK, response.Result{
+			Code: 400,
+			Msg:  "验证失败",
+			Data: err,
+		})
+		fmt.Printf("%v，req：%+v\n", err, req)
+		return
+	}
+	if !ok {
+		ctx.JSON(http.StatusOK, response.Result{
+			Code: 400,
+			Msg:  "验证码有误",
+			Data: req,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, response.Result{
+		Code: 200,
+		Msg:  "登录成功",
+		Data: "",
+	})
 }
 
 func (u *UserHandle) Edit(ctx *gin.Context) {

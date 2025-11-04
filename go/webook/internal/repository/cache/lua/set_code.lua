@@ -1,21 +1,18 @@
--- 你的验证码在Redis上的key
--- phone_code:login:152......
-local key = KEYS[1]
--- 验证次数,我们一个验证码,最多重复三次, 这个记录了验证了几次
--- phone_code:login:152......:cnt
-local val = ARGV[1]
--- 过期时间
-local ttl = tonumber(redis.call("ttl", key))
-if ttl == -1 then
-    -- key 存在,但没有过期时间
-    return -2
-elseif ttl == -2 or ttl < 540 then
-    redis.call("set", key, val)
-    redis.call("expire", key, 600)
-    redis.call("set", cntKey, 3)
-    redis.call("expire", cntKey, 600)
-    -- 符合预期
-    return 0
-else
-    return -1
-end
+-- 适配 Hash 结构的验证码存储脚本（生成验证码时调用）
+local codeHashKey = KEYS[1]  -- phone_code
+local cntHashKey = KEYS[2]   -- phone_code:cnt
+local field = ARGV[1]        -- biz:phone（如 "login_sms:138xxxx8888"）
+local code = ARGV[2]         -- 生成的验证码
+local expireSec = 600        -- 过期时间（10分钟）
+
+-- 1. 存储验证码到 Hash 表（HSET 替代 SET）
+redis.call("HSET", codeHashKey, field, code)
+-- 2. 设置 Hash 表的过期时间（整体过期，而非单个字段）
+redis.call("EXPIRE", codeHashKey, expireSec)
+
+-- 3. 存储错误次数（3次）到 Hash 表
+redis.call("HSET", cntHashKey, field, 3)
+-- 4. 错误次数 Hash 表同步过期时间
+redis.call("EXPIRE", cntHashKey, expireSec)
+
+return 0 -- 存储成功
