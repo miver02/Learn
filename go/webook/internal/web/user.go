@@ -267,8 +267,8 @@ func (u *UserHandle) SendLoginSmsCode(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.Result{
 			Code: 401,
-			Msg:  "验证码发送失败",
-			Data: err,
+			Msg:  err.Error(),
+			Data: "",
 		})
 		fmt.Printf("%v\n", err)
 		return
@@ -290,16 +290,16 @@ func (u *UserHandle) LoginSms(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, response.Result{
 			Code: 400,
 			Msg:  "参数格式错误",
-			Data: err,
+			Data: "",
 		})
-		fmt.Printf("解析参数失败：%v，req：%+v\n", err, req)
+		fmt.Printf("req：%+v, 解析参数失败：%v\n", req, err)
 		return
 	}
 	if req.Phone == "" {
 		ctx.JSON(http.StatusOK, response.Result{
 			Code: 400,
 			Msg:  "请求参数错误",
-			Data: req,
+			Data: "",
 		})
 		return
 	}
@@ -308,17 +308,17 @@ func (u *UserHandle) LoginSms(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.Result{
 			Code: 400,
-			Msg:  "验证失败",
-			Data: err,
+			Msg:  err.Error(),
+			Data: "",
 		})
-		fmt.Printf("%v，req：%+v\n", err, req)
+		fmt.Printf("req：%+v, 验证失败：%v\n", req, err)
 		return
 	}
 	if !ok {
 		ctx.JSON(http.StatusOK, response.Result{
 			Code: 400,
 			Msg:  "验证码有误",
-			Data: req,
+			Data: "",
 		})
 		return
 	}
