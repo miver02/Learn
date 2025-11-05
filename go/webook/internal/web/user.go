@@ -19,10 +19,6 @@ import (
 
 // var ErrUserDuplicateEmail = service.ErrUserDuplicateEmail
 
-const (
-	biz = "login_sms"
-)
-
 // user相关路由定义
 type UserHandle struct {
 	svc      *service.UserService
@@ -263,7 +259,7 @@ func (u *UserHandle) SendLoginSmsCode(ctx *gin.Context) {
 		fmt.Printf("%v\n", err)
 		return
 	}
-	code, err := u.codeSvc.Send(ctx, biz, req.Phone)
+	code, err := u.codeSvc.Send(ctx, req.Phone)
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.Result{
 			Code: 401,
@@ -304,7 +300,7 @@ func (u *UserHandle) LoginSms(ctx *gin.Context) {
 		return
 	}
 	// 可以加各种数据效验
-	ok, err := u.codeSvc.Verify(ctx, biz, req.Phone, req.Code)
+	ok, err := u.codeSvc.Verify(ctx, req.Phone, req.Code)
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.Result{
 			Code: 400,

@@ -3,13 +3,14 @@ package repository
 import (
 	"context"
 
+	"github.com/miver02/Learn/go/webook/internal/consts"
 	"github.com/miver02/Learn/go/webook/internal/repository/cache"
 )
 
 
 var (
-	ErrCodeSendTooMany = cache.ErrCodeSendTooMany
-	ErrVerityTooMany = cache.ErrVerityTooMany
+	ErrCodeSendTooMany = consts.ErrCodeSendTooMany
+	ErrVerityTooMany = consts.ErrVerityTooMany
 )
 	
 
@@ -23,10 +24,10 @@ func NewCodeRepository(codeCache *cache.CodeCache) *CodeRepository {
 	}
 }
 
-func (repo *CodeRepository) Store(ctx context.Context, biz, phone, code string) error {
-	return repo.cache.Set(ctx, biz, phone, code)
+func (repo *CodeRepository) Store(ctx context.Context, phone, code string) error {
+	return repo.cache.Set(ctx, phone, code)
 }
 
-func (repo *CodeRepository) Verify(ctx context.Context, biz, phone, inputCode string) (bool, error) {
-	return repo.cache.Verify(ctx, biz, phone, inputCode)
+func (repo *CodeRepository) Verify(ctx context.Context, phone, inputCode string) (bool, error) {
+	return repo.cache.Verify(ctx, phone, inputCode)
 }
