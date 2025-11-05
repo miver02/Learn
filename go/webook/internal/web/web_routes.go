@@ -3,11 +3,11 @@ package web
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/miver02/Learn/go/webook/internal/repository"
-	"github.com/miver02/Learn/go/webook/internal/repository/cache"
-	"github.com/miver02/Learn/go/webook/internal/repository/dao"
-	"github.com/miver02/Learn/go/webook/internal/service"
-	"github.com/miver02/Learn/go/webook/internal/service/sms/memory"
+	"github.com/miver02/learn-program/go/webook/internal/repository"
+	"github.com/miver02/learn-program/go/webook/internal/repository/cache"
+	"github.com/miver02/learn-program/go/webook/internal/repository/dao"
+	"github.com/miver02/learn-program/go/webook/internal/service"
+	"github.com/miver02/learn-program/go/webook/internal/service/sms/memory"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -48,5 +48,3 @@ func RegisterUserRoutes(api *gin.Engine, svc *service.UserService, codeSvc *serv
 	ug.POST("/login_sms/code/send", func(ctx *gin.Context) { u.SendLoginSmsCode(ctx) })
 	ug.POST("/login_sms", func(ctx *gin.Context) { u.LoginSms(ctx) })
 }
-
-

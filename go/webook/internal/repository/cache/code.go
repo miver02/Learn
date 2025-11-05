@@ -3,8 +3,9 @@ package cache
 import (
 	"context"
 	_ "embed"
-	"github.com/miver02/Learn/go/webook/internal/consts"
 	"fmt"
+
+	"github.com/miver02/learn-program/go/webook/internal/consts"
 	"github.com/redis/go-redis/v9"
 )
 

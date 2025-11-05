@@ -11,10 +11,10 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/miver02/Learn/go/webook/internal/consts"
-	"github.com/miver02/Learn/go/webook/internal/domain"
-	"github.com/miver02/Learn/go/webook/internal/model/response"
-	"github.com/miver02/Learn/go/webook/internal/service"
+	"github.com/miver02/learn-program/go/webook/internal/consts"
+	"github.com/miver02/learn-program/go/webook/internal/domain"
+	"github.com/miver02/learn-program/go/webook/internal/model/response"
+	"github.com/miver02/learn-program/go/webook/internal/service"
 )
 
 // var ErrUserDuplicateEmail = service.ErrUserDuplicateEmail

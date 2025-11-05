@@ -3,16 +3,14 @@ package repository
 import (
 	"context"
 
-	"github.com/miver02/Learn/go/webook/internal/consts"
-	"github.com/miver02/Learn/go/webook/internal/repository/cache"
+	"github.com/miver02/learn-program/go/webook/internal/consts"
+	"github.com/miver02/learn-program/go/webook/internal/repository/cache"
 )
-
 
 var (
 	ErrCodeSendTooMany = consts.ErrCodeSendTooMany
-	ErrVerityTooMany = consts.ErrVerityTooMany
+	ErrVerityTooMany   = consts.ErrVerityTooMany
 )
-	
 
 type CodeRepository struct {
 	cache *cache.CodeCache

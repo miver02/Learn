@@ -1,4 +1,4 @@
-module github.com/miver02/Learn/go/webook
+module github.com/miver02/learn-program/go/webook
 
 go 1.24.0
 

@@ -5,13 +5,13 @@ import (
 	"context"
 	"errors"
 
-	"github.com/miver02/Learn/go/webook/internal/domain"
-	"github.com/miver02/Learn/go/webook/internal/repository"
+	"github.com/miver02/learn-program/go/webook/internal/domain"
+	"github.com/miver02/learn-program/go/webook/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var (
-	ErrUserDuplicateEmail = repository.ErrUserDuplicateEmail
+	ErrUserDuplicateEmail    = repository.ErrUserDuplicateEmail
 	ErrInvalidUserOrPassword = errors.New("邮箱或者密码不对")
 )
 
@@ -22,11 +22,10 @@ type UserService struct {
 func NewUserService(repo *repository.UserRepository) *UserService {
 	return &UserService{
 		repo: repo,
-
 	}
 }
 
-func (svc *UserService) Edit(ctx context.Context, new_udo domain.User) (error) {
+func (svc *UserService) Edit(ctx context.Context, new_udo domain.User) error {
 	err := svc.repo.InsertUserInfo(ctx, new_udo)
 	if err != nil {
 		return err
@@ -43,7 +42,7 @@ func (svc *UserService) Login(ctx context.Context, new_udo domain.User) (domain.
 	if err != nil {
 		return datas_u, err
 	}
-	
+
 	// 比较密码
 	err = bcrypt.CompareHashAndPassword([]byte(datas_u.Password), []byte(new_udo.Password))
 	if err != nil {

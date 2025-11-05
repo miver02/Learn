@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/miver02/Learn/go/webook/pkg/ginx/middleware/ratelimit"
+	"github.com/miver02/learn-program/go/webook/pkg/ginx/middleware/ratelimit"
 	redisClient "github.com/redis/go-redis/v9"
 
 	redis "github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
-	"github.com/miver02/Learn/go/webook/internal/consts"
-	"github.com/miver02/Learn/go/webook/internal/repository/dao"
+	"github.com/miver02/learn-program/go/webook/internal/consts"
+	"github.com/miver02/learn-program/go/webook/internal/repository/dao"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -57,18 +57,18 @@ func (idb *InitDatebase) InitOldRedis() redis.Store {
 // @支持更丰富的命令和异步操作
 // @github.com/go-redis/redis/v8 或 v9
 func (idb *InitDatebase) InitNewRedis() *redisClient.Client {
-    client := redisClient.NewClient(&redisClient.Options{
-        Addr:     consts.RedisAddr,      // Redis 地址（如 "localhost:6379"）
-        Username: consts.RedisUser,      // 用户名（如果有）
-        Password: consts.RedisPassword,  // 密码（如果有）
-        DB:       0,                     // 默认数据库
-    })
-    // 测试连接
-    _, err := client.Ping(context.Background()).Result()
-    if err != nil {
-        panic("Redis 连接失败: " + err.Error())
-    }
-    return client
+	client := redisClient.NewClient(&redisClient.Options{
+		Addr:     consts.RedisAddr,     // Redis 地址（如 "localhost:6379"）
+		Username: consts.RedisUser,     // 用户名（如果有）
+		Password: consts.RedisPassword, // 密码（如果有）
+		DB:       0,                    // 默认数据库
+	})
+	// 测试连接
+	_, err := client.Ping(context.Background()).Result()
+	if err != nil {
+		panic("Redis 连接失败: " + err.Error())
+	}
+	return client
 }
 
 // 实现redis限流

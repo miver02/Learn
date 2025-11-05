@@ -6,10 +6,9 @@ import (
 	// "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 
-	"github.com/miver02/Learn/go/webook/internal/repository"
-	"github.com/miver02/Learn/go/webook/internal/web"
+	"github.com/miver02/learn-program/go/webook/internal/repository"
+	"github.com/miver02/learn-program/go/webook/internal/web"
 )
-
 
 func main() {
 	// 创建一个默认的 HTTP 服务器实例
@@ -18,7 +17,7 @@ func main() {
 	// 数据库层
 	db := repository.NewInitDatebase().InitDB()
 	// rdb := repository.NewInitDatebase().InitOldRedis() 	// 老的redis库
-	rc := repository.NewInitDatebase().InitNewRedis()		// 新的redis库
+	rc := repository.NewInitDatebase().InitNewRedis() // 新的redis库
 	// repository.NewInitDatebase().InitRateLimit(api)		// 注册redis限流
 	// api.Use(sessions.Sessions("mysession", rdb))
 
@@ -33,12 +32,9 @@ func main() {
 	// 路由层
 	api = web.RegisterRoutes(db, rc, api)
 
-	api.GET("/hello", func(ctx *gin.Context)  {
+	api.GET("/hello", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "你好,k8s\n")
 	})
 	// 启动地址
 	api.Run(":8001")
-} 
-
-
-
+}

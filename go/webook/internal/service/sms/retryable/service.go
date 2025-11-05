@@ -3,9 +3,8 @@ package retryable
 import (
 	"context"
 
-	"github.com/miver02/Learn/go/webook/internal/service/sms"
+	"github.com/miver02/learn-program/go/webook/internal/service/sms"
 )
-
 
 type Service struct {
 	svc sms.Service
@@ -21,7 +20,7 @@ func New(svc sms.Service, retryCnt int) *Service {
 	}
 }
 
-func (s *Service) Send(ctx context.Context, tpl string, args []string, numbers...string) error {
+func (s *Service) Send(ctx context.Context, tpl string, args []string, numbers ...string) error {
 	var err error
 	for i := 0; i < s.retryCnt; i++ {
 		err = s.svc.Send(ctx, tpl, args, numbers...)

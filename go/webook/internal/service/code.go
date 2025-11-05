@@ -5,17 +5,16 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/miver02/Learn/go/webook/internal/repository"
-	"github.com/miver02/Learn/go/webook/internal/service/sms"
+	"github.com/miver02/learn-program/go/webook/internal/repository"
+	"github.com/miver02/learn-program/go/webook/internal/service/sms"
 )
-
 
 const (
 	codeTplId = "10086"
 )
 
 type CodeService struct {
-	repo *repository.CodeRepository
+	repo   *repository.CodeRepository
 	smsSvc sms.Service
 	// tplId string
 }
