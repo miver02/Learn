@@ -3,6 +3,7 @@ package dao
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 )
 
 var (
-	ErrUserDuplicateEmail = errors.New("邮箱冲突")
+	ErrUserDuplicate = errors.New("邮箱或者手机号冲突")
 	ErrUserNotFound       = gorm.ErrRecordNotFound
 )
 
@@ -20,10 +21,11 @@ var (
 type User struct {
 	Id           int64 `gorm:"primaryKey,autoIncrement"`
 	Name         string
-	Email        string `gorm:"unique"`
+	Email        sql.NullString `gorm:"unique"`
 	Password     string
 	Birthday     string
 	Introduction string
+	Phone        sql.NullString `gorm:"unique"`
 
 	// 创建时间
 	Ctime int64
@@ -41,21 +43,22 @@ func NewUserDAO(db *gorm.DB) *UserDAO {
 	}
 }
 
-func (dao *UserDAO) InsertUserInfo(ctx context.Context, new_ud domain.User) error {
+func (dao *UserDAO) InsertUserInfo(ctx context.Context, domain_user domain.User) error {
 	updates := map[string]interface{}{
-		"name":         new_ud.Name,
-		"birthday":     new_ud.Birthday,
-		"introduction": new_ud.Introduction,
+		"name":         domain_user.Name,
+		"birthday":     domain_user.Birthday,
+		"introduction": domain_user.Introduction,
+		"phone":        domain_user.Phone,
 	}
-	err := dao.db.WithContext(ctx).Model(&User{}).Where("id = ?", new_ud.Id).
+	err := dao.db.WithContext(ctx).Model(&User{}).Where("id = ?", domain_user.Id).
 		Updates(updates).Error
 	return err
 }
 
 func (dao *UserDAO) FindByEmail(ctx context.Context, email string) (User, error) {
-	var ud User
-	err := dao.db.WithContext(ctx).Where("email = ?", email).Find(&ud).Error
-	return ud, err
+	var user User
+	err := dao.db.WithContext(ctx).Where("email = ?", email).Find(&user).Error
+	return user, err
 }
 
 func (dao *UserDAO) Insert(ctx context.Context, u User) error {
@@ -67,14 +70,20 @@ func (dao *UserDAO) Insert(ctx context.Context, u User) error {
 		const uniqueConflictsErrNo uint16 = 1062
 		if mysqlErr.Number == uniqueConflictsErrNo {
 			// 邮箱冲突
-			return ErrUserDuplicateEmail
+			return ErrUserDuplicate
 		}
 	}
 	return err
 }
 
-func (dao *UserDAO) FindById(ctx context.Context, id int64) (User, error) {
-	var ud User
-	err := dao.db.WithContext(ctx).Where("id = ?", id).Find(&ud).Error
-	return ud, err
+func (dao *UserDAO) FindEmailById(ctx context.Context, id int64) (User, error) {
+	var user User
+	err := dao.db.WithContext(ctx).Where("id = ?", id).Find(&user).Error
+	return user, err
+}
+
+func (dao *UserDAO) FindByPhone(ctx context.Context, phone string) (User, error) {
+	var user User
+	err := dao.db.WithContext(ctx).Where("phone = ?", phone).Find(&user).Error
+	return user, err
 }

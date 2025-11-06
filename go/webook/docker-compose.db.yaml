@@ -15,14 +15,29 @@ services:
 
   # Redis服务（带数据持久化）
   redis:
-    image: 'bitnami/redis:latest'
-    environment:
-      - REDIS_PASSWORD=redis  # 替换为你的密码
+    image: redis:latest
+    restart: always
+     # 关键：官方镜像支持的命令行参数（直接传递给 redis-server）
+    # command: >
+    #   redis-server
+    #   --requirepass redis  # 密码（对应你想要的 REDIS_PASSWORD=redis）
+    #   --appendonly yes     # 启用 AOF（对应 REDIS_AOF_ENABLED=yes）
+    #   --appendfsync everysec  # AOF 同步策略（对应 REDIS_AOF_FSYNC=everysec）
+    # environment:
+    #   - REDIS_PASSWORD=redis  # 替换为你的密码
+    #   - REDIS_AOF_ENABLED=yes  # 必须启用 AOF，实时持久化
+    #   - REDIS_AOF_FSYNC=everysec # 每秒同步一次，权衡性能和数据安全
     volumes:
       # Redis数据持久化卷（核心：容器内数据目录映射到命名卷）
       - redis_data:/data  # /data是Redis容器内默认数据目录
+      - ./config/redis/redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf
     ports:
       - '6379:6379'
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
 # 声明命名卷（用于存储MySQL和Redis的数据，独立于容器生命周期）
 volumes:

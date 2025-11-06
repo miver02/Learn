@@ -14,15 +14,15 @@ import (
 
 func RegisterRoutes(db *gorm.DB, redisClient redis.Cmdable, api *gin.Engine) *gin.Engine {
 	// 初始化user
-	svc, codeSvc := InitUser(db, redisClient)
+	u := InitUser(db, redisClient)
 
 	// 注册用户路由
-	RegisterUserRoutes(api, svc, codeSvc)
+	RegisterUserRoutes(api, u)
 
 	return api
 }
 
-func InitUser(db *gorm.DB, redisClient redis.Cmdable) (*service.UserService, *service.CodeService) {
+func InitUser(db *gorm.DB, redisClient redis.Cmdable) (u *UserHandle) {
 	ud := dao.NewUserDAO(db)
 	userCache := cache.NewUserCache(redisClient)
 	repo := repository.NewUserRepository(ud, userCache)
@@ -31,12 +31,13 @@ func InitUser(db *gorm.DB, redisClient redis.Cmdable) (*service.UserService, *se
 	codeRepo := repository.NewCodeRepository(codeCache)
 	smsSvc := memory.NewService()
 	codeSvc := service.NewCodeService(codeRepo, smsSvc)
-	return svc, codeSvc
+	jwtSvc := service.NewJwtServer()
+	u = NewUserHandle(svc, codeSvc, jwtSvc)
+	return u
 }
 
-func RegisterUserRoutes(api *gin.Engine, svc *service.UserService, codeSvc *service.CodeService) {
+func RegisterUserRoutes(api *gin.Engine, u *UserHandle) {
 	// 注册users路由
-	u := NewUserHandle(svc, codeSvc)
 	ug := api.Group("/users")
 	ug.POST("/signup", func(ctx *gin.Context) { u.SignUp(ctx) })
 	ug.POST("/login", func(ctx *gin.Context) { u.Login(ctx) })

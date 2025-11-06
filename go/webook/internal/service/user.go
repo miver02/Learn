@@ -25,8 +25,8 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 	}
 }
 
-func (svc *UserService) Edit(ctx context.Context, new_udo domain.User) error {
-	err := svc.repo.InsertUserInfo(ctx, new_udo)
+func (svc *UserService) Edit(ctx context.Context, domain_user domain.User) error {
+	err := svc.repo.InsertUserInfo(ctx, domain_user)
 	if err != nil {
 		return err
 	}
@@ -52,21 +52,35 @@ func (svc *UserService) Login(ctx context.Context, new_udo domain.User) (domain.
 	return datas_u, nil
 }
 
-func (svc *UserService) SignUp(ctx context.Context, u domain.User) error {
+func (svc *UserService) SignUp(ctx context.Context, domain_user domain.User) error {
 	// 考虑加密放在哪里
-	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(domain_user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	u.Password = string(hash)
+	domain_user.Password = string(hash)
 	// 然后才存起来
-	return svc.repo.Create(ctx, u)
+	return svc.repo.Create(ctx, domain_user)
 }
 
 func (svc *UserService) Profile(ctx context.Context, id int64) (domain.User, error) {
-	u, err := svc.repo.FindById(ctx, id)
+	u, err := svc.repo.FindEmailById(ctx, id)
 	if err != nil {
 
 	}
 	return u, err
+}
+
+func (svc *UserService) FindOrCreate(ctx context.Context, phone string) (domain.User, error) {
+	domain_user, err := svc.repo.FindByPhone(ctx, phone)
+	if err != repository.ErrUserNotFound {
+		return domain_user, err
+	}
+	err = svc.repo.Create(ctx, domain.User{
+		Phone: phone,
+	})
+	if err != nil {
+		return domain_user, err
+	}
+	return svc.repo.FindByPhone(ctx, phone)
 }

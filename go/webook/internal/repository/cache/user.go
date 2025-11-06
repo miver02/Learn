@@ -30,9 +30,9 @@ func (c *UserCache) Get(ctx context.Context, id int64) (domain.User, error) {
 	if err != nil {
 		return domain.User{}, err
 	}
-	var u domain.User
-	err = json.Unmarshal(val, &u)
-	return u, err
+	var domain_user domain.User
+	err = json.Unmarshal(val, &domain_user)
+	return domain_user, err
 }
 
 func (c *UserCache) Set(ctx context.Context, u domain.User) error {

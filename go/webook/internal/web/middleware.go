@@ -12,6 +12,7 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/miver02/learn-program/go/webook/internal/service"
 )
 
 type MiddlewareBuilder struct {
@@ -121,7 +122,7 @@ func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 
 		tokenStr := segs[1]
 		// 提取token中的参数,一定要传入指针
-		claims := &UserClaims{}
+		claims := &service.UserClaims{}
 		token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte("secret"), nil
 		})
@@ -146,7 +147,7 @@ func (mb *MiddlewareBuilder) LoginMiddleWareJwtBuilder(api *gin.Engine) {
 		// 刷新jwt
 		now := time.Now()
 		if claims.ExpiresAt.Sub(now) < time.Second*30 {
-			claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute))
+			claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Minute * 3600 * 24))
 			tokenStr, err := token.SignedString([]byte("secret"))
 			if err != nil {
 				ctx.String(http.StatusOK, err.Error())
