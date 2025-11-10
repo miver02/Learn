@@ -1,6 +1,10 @@
 package consts
 
-import "errors"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 // 短信验证错误
 var (
@@ -17,4 +21,10 @@ var (
 var (
 	ErrUnknown = errors.New("未知错误")
 	ErrSystem  = errors.New("系统错误")
+)
+
+var (
+	ErrUserDuplicate = errors.New("邮箱或者手机号冲突")
+	ErrUserNotFound  = gorm.ErrRecordNotFound
+	ErrInvalidUserOrPassword = errors.New("邮箱或者密码不对")
 )

@@ -39,14 +39,7 @@ func NewUserHandle(svc *service.UserService, codeSvc *service.CodeService, jwtSv
 }
 
 func (u *UserHandle) SignUp(ctx *gin.Context) {
-	type SignUpReq struct {
-		// 内部结构体
-		Email           string `json:"email"`
-		ConfirmPassword string `json:"confirmPassword"`
-		Password        string `json:"password"`
-	}
-
-	var req SignUpReq
+	var req response.SignUpReq
 	// Bind会根据Content-Type类型解析你的数据到req中
 	// 解析错了会返回400错误
 	if err := ctx.Bind(&req); err != nil {
@@ -54,40 +47,19 @@ func (u *UserHandle) SignUp(ctx *gin.Context) {
 		fmt.Printf("%v\n", err)
 		return
 	}
-	// 邮箱效验
-	ok, err := u.emailExp.MatchString(req.Email)
-	if err != nil {
-		ctx.String(http.StatusOK, "系统错误")
-		return
-	}
-	if !ok {
-		ctx.String(http.StatusOK, "邮箱格式错误")
-		return
-	}
-
-	// 密码效验
-	if req.ConfirmPassword != req.Password {
-		ctx.String(http.StatusOK, "两次输入的密码不一致")
-		return
-	}
-	ok, err = u.pwdExp.MatchString(req.Password)
-	if err != nil {
-		// 记录日志
-		ctx.String(http.StatusOK, "系统错误")
-		return
-	}
-
-	if !ok {
-		ctx.String(http.StatusOK, "密码必须大于八位,且包含字母和特殊字符")
+	// 邮箱和密码验证
+	okEmail := u.emailCheck(ctx, req)
+	okPwd := u.pwdCheck(ctx, req)
+	if !okEmail || !okPwd {
 		return
 	}
 
 	// 调用一下svc的方法
-	err = u.svc.SignUp(ctx, domain.User{
+	_, err := u.svc.SignUp(ctx, domain.User{
 		Email:    req.Email,
 		Password: req.Password,
 	})
-	if err == service.ErrUserDuplicateEmail {
+	if err == consts.ErrCodeNotFound {
 		ctx.String(http.StatusOK, err.Error())
 		return
 	}
@@ -100,6 +72,40 @@ func (u *UserHandle) SignUp(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "注册成功")
 	fmt.Printf("%v\n", req)
 	// 数据库操作
+}
+
+func (u *UserHandle) emailCheck(ctx *gin.Context, req response.SignUpReq) bool {
+	// 邮箱效验
+	ok, err := u.emailExp.MatchString(req.Email)
+	if err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return false
+	}
+	if !ok {
+		ctx.String(http.StatusOK, "邮箱格式错误")
+		return false
+	}
+	return true
+}
+
+func (u *UserHandle) pwdCheck(ctx *gin.Context, req response.SignUpReq) bool {
+	// 密码效验
+	if req.ConfirmPassword != req.Password {
+		ctx.String(http.StatusOK, "两次输入的密码不一致")
+		return false
+	}
+	ok, err := u.pwdExp.MatchString(req.Password)
+	if err != nil {
+		// 记录日志
+		ctx.String(http.StatusOK, "系统错误")
+		return false
+	}
+
+	if !ok {
+		ctx.String(http.StatusOK, "密码必须大于八位,且包含字母和特殊字符")
+		return false
+	}
+	return true
 }
 
 func (u *UserHandle) Login(ctx *gin.Context) {
@@ -117,7 +123,7 @@ func (u *UserHandle) Login(ctx *gin.Context) {
 		Email:    req.Email,
 		Password: req.Password,
 	})
-	if err == service.ErrInvalidUserOrPassword {
+	if err == consts.ErrInvalidUserOrPassword {
 		ctx.String(http.StatusOK, err.Error())
 		return
 	}
@@ -168,6 +174,7 @@ func (u *UserHandle) SendLoginSmsCode(ctx *gin.Context) {
 }
 
 func (u *UserHandle) LoginSms(ctx *gin.Context) {
+
 	type Req struct {
 		Phone string `json:"phone" form:"phone"`
 		Code  string `json:"code" form:"code"`
@@ -211,6 +218,11 @@ func (u *UserHandle) LoginSms(ctx *gin.Context) {
 	}
 
 	domain_user, err := u.svc.FindOrCreate(ctx, req.Phone)
+	switch {
+	case err == nil:
+		fmt.Printf("")
+	}
+
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.Result{
 			Code: 500,
@@ -236,48 +248,55 @@ func (u *UserHandle) LoginSms(ctx *gin.Context) {
 }
 
 func (u *UserHandle) Edit(ctx *gin.Context) {
-	type EditReq struct {
-		Name         string `json:"name"`
-		Birthday     string `json:"birthday"`
-		Introduction string `json:"introduction"`
-		Phone        string `json:"phone"`
-	}
 
-	var req EditReq
+	var req response.EditReq
 	// 提取数据
 	if err := ctx.Bind(&req); err != nil {
 		ctx.String(http.StatusOK, "参数格式错误")
 		fmt.Printf("%v\n", err)
 		return
 	}
-
-	_, err := time.Parse("2006-01-02", req.Birthday)
-	if err != nil {
-		ctx.String(http.StatusOK, "日期格式不对")
-		return
+	// 邮箱和密码验证
+	reqCheck := response.SignUpReq{
+		Email:           req.Email,
+		Password:        req.Password,
+		ConfirmPassword: req.ConfirmPassword,
 	}
-
-	lenName := utf8.RuneCountInString(req.Name)
-	if lenName < 6 && lenName > 15 {
-		ctx.String(http.StatusOK, "名字字数不够")
-		return
-	}
-
-	if utf8.RuneCountInString(req.Introduction) > 20 {
-		ctx.String(http.StatusOK, "个人简介内容太多")
-		return
-	}
-
-	/*
-		// 不单独使用session，而是使用jwt
-		sess := sessions.Default(ctx)
-		idVal := sess.Get("UserId")
-		id, ok := idVal.(int64)
-		if !ok {
-			ctx.String(http.StatusUnauthorized, "未登录或会话失效")
+	if req.Email != "" {
+		okEmail := u.emailCheck(ctx, reqCheck)
+		if !okEmail {
 			return
 		}
-	*/
+	}
+	if req.Password != "" {
+		okPwd := u.pwdCheck(ctx, reqCheck)
+		if !okPwd {
+			return
+		}
+	}
+
+	if req.Birthday != "" {
+		_, err := time.Parse("2006-01-02", req.Birthday)
+		if err != nil {
+			ctx.String(http.StatusOK, "日期格式不对")
+			return
+		}
+	}
+
+	if req.Name != "" {
+		lenName := utf8.RuneCountInString(req.Name)
+		if lenName < 6 && lenName > 15 {
+			ctx.String(http.StatusOK, "名字字数不够")
+			return
+		}
+	}
+
+	if req.Introduction != "" {
+		if utf8.RuneCountInString(req.Introduction) > 20 {
+			ctx.String(http.StatusOK, "个人简介内容太多")
+			return
+		}
+	}
 
 	id, err := u.jwtSvc.GetIdByJwtClaims(ctx)
 	if err != nil {
@@ -301,6 +320,8 @@ func (u *UserHandle) Edit(ctx *gin.Context) {
 	err = u.svc.Edit(ctx, domain.User{
 		Id:           id,
 		Name:         req.Name,
+		Email:        req.Email,
+		Password:     req.Password,
 		Birthday:     req.Birthday,
 		Introduction: req.Introduction,
 		Phone:        req.Phone,

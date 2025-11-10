@@ -4,17 +4,11 @@ package dao
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/miver02/learn-program/go/webook/internal/domain"
+	"github.com/miver02/learn-program/go/webook/internal/consts"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrUserDuplicate = errors.New("邮箱或者手机号冲突")
-	ErrUserNotFound       = gorm.ErrRecordNotFound
 )
 
 // User 直接对应数据库表
@@ -43,15 +37,44 @@ func NewUserDAO(db *gorm.DB) *UserDAO {
 	}
 }
 
-func (dao *UserDAO) InsertUserInfo(ctx context.Context, domain_user domain.User) error {
-	updates := map[string]interface{}{
-		"name":         domain_user.Name,
-		"birthday":     domain_user.Birthday,
-		"introduction": domain_user.Introduction,
-		"phone":        domain_user.Phone,
+func (dao *UserDAO) InsertUserInfo(ctx context.Context, user User) error {
+	updates := make(map[string]interface{})
+
+	if user.Password != "" {
+		updates["password"] = user.Password
 	}
-	err := dao.db.WithContext(ctx).Model(&User{}).Where("id = ?", domain_user.Id).
+	if user.Phone.Valid && user.Phone.String != "" {
+		updates["phone"] = user.Phone
+	}
+	if user.Name != "" {
+		updates["name"] = user.Name
+	}
+	if user.Email.Valid && user.Email.String != "" {
+		updates["email"] = user.Email
+	}
+	if user.Birthday != "" {
+		updates["birthday"] = user.Birthday
+	}
+	if user.Introduction != "" {
+		updates["introduction"] = user.Introduction
+	}
+	// fmt.Printf("%v", updates)
+	err := dao.db.WithContext(ctx).Model(&User{}).Where("id = ?", user.Id).
 		Updates(updates).Error
+	// 处理唯一性冲突错误
+	err = dao.uniqueCheck(err)
+	return err
+}
+
+func (dao *UserDAO) uniqueCheck(err error) error {
+	// 处理唯一性冲突错误
+	if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+		const uniqueConflictsErrNo uint16 = 1062
+		if mysqlErr.Number == uniqueConflictsErrNo {
+			// 邮箱冲突或者手机好冲突
+			return consts.ErrUserDuplicate
+		}
+	}
 	return err
 }
 
@@ -61,19 +84,14 @@ func (dao *UserDAO) FindByEmail(ctx context.Context, email string) (User, error)
 	return user, err
 }
 
-func (dao *UserDAO) Insert(ctx context.Context, u User) error {
+func (dao *UserDAO) Insert(ctx context.Context, user User) (User, error) {
 	now := time.Now().UnixMilli()
-	u.Utime = now
-	u.Ctime = now
-	err := dao.db.WithContext(ctx).Create(&u).Error
-	if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-		const uniqueConflictsErrNo uint16 = 1062
-		if mysqlErr.Number == uniqueConflictsErrNo {
-			// 邮箱冲突
-			return ErrUserDuplicate
-		}
-	}
-	return err
+	user.Utime = now
+	user.Ctime = now
+	err := dao.db.WithContext(ctx).Create(&user).Error
+	// 处理唯一性冲突错误
+	err = dao.uniqueCheck(err)
+	return user, err
 }
 
 func (dao *UserDAO) FindEmailById(ctx context.Context, id int64) (User, error) {
@@ -84,6 +102,6 @@ func (dao *UserDAO) FindEmailById(ctx context.Context, id int64) (User, error) {
 
 func (dao *UserDAO) FindByPhone(ctx context.Context, phone string) (User, error) {
 	var user User
-	err := dao.db.WithContext(ctx).Where("phone = ?", phone).Find(&user).Error
+	err := dao.db.WithContext(ctx).Where("phone = ?", phone).First(&user).Error
 	return user, err
 }

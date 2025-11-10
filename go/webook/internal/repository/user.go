@@ -11,11 +11,6 @@ import (
 	"github.com/miver02/learn-program/go/webook/internal/repository/dao"
 )
 
-var (
-	ErrUserDuplicateEmail = dao.ErrUserDuplicate
-	ErrUserNotFound       = dao.ErrUserNotFound
-)
-
 type UserRepository struct {
 	dao   *dao.UserDAO
 	cache *cache.UserCache
@@ -29,7 +24,7 @@ func NewUserRepository(dao *dao.UserDAO, c *cache.UserCache) *UserRepository {
 }
 
 func (r *UserRepository) InsertUserInfo(ctx context.Context, domain_user domain.User) error {
-	err := r.dao.InsertUserInfo(ctx, domain_user)
+	err := r.dao.InsertUserInfo(ctx, r.domainToDao(domain_user))
 	if err != nil {
 		return err
 	}
@@ -44,8 +39,9 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.
 	return r.daoToDomain(user), nil
 }
 
-func (r *UserRepository) Create(ctx context.Context, domain_user domain.User) error {
-	return r.dao.Insert(ctx, r.domainToDao(domain_user))
+func (r *UserRepository) Create(ctx context.Context, domain_user domain.User) (domain.User, error) {
+	user, err := r.dao.Insert(ctx, r.domainToDao(domain_user))
+	return r.daoToDomain(user), err
 }
 
 func (r *UserRepository) FindEmailById(ctx context.Context, id int64) (domain.User, error) {
@@ -62,7 +58,7 @@ func (r *UserRepository) FindEmailById(ctx context.Context, id int64) (domain.Us
 
 	user, err := r.dao.FindEmailById(ctx, id)
 	if err != nil {
-		return domain.User{}, nil
+		return domain.User{}, err
 	}
 
 	domain_user = r.daoToDomain(user)
@@ -115,11 +111,13 @@ func (r *UserRepository) domainToDao(domain_user domain.User) dao.User {
 
 	// 3. 其他字段直接赋值，返回 dao.User
 	return dao.User{
-		Id:       domain_user.Id,
-		Email:    email, // 已转换为 sql.NullString
-		Phone:    phone,
-		Password: domain_user.Password,
-		Ctime:    ctime, // 已转换为 int64 毫秒时间戳
+		Id:           domain_user.Id,
+		Name:         domain_user.Name,
+		Introduction: domain_user.Introduction,
+		Email:        email, // 已转换为 sql.NullString
+		Phone:        phone,
+		Password:     domain_user.Password,
+		Ctime:        ctime, // 已转换为 int64 毫秒时间戳
 	}
 }
 func (r *UserRepository) daoToDomain(user dao.User) domain.User {
@@ -131,10 +129,12 @@ func (r *UserRepository) daoToDomain(user dao.User) domain.User {
 		phone = user.Phone.String
 	}
 	return domain.User{
-		Id:       user.Id,
-		Email:    email,
-		Phone:    phone,
-		Password: user.Password,
-		Ctime:    time.UnixMilli(user.Ctime),
+		Id:           user.Id,
+		Name:         user.Name,
+		Introduction: user.Introduction,
+		Email:        email,
+		Phone:        phone,
+		Password:     user.Password,
+		Ctime:        time.UnixMilli(user.Ctime),
 	}
 }
