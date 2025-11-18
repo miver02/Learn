@@ -1,0 +1,5 @@
+[alias]
+co = switch  # git co = git switch
+br = branch  # git br = git branch
+ci = commit -m  # git ci "feat: xxx" = git commit -m "feat: xxx"
+lg = log --graph --oneline --all  # 简洁查看所有分支日志
