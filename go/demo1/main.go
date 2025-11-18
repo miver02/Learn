@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/miver02/Learn/go/demo1/basic_type"
-	"github.com/miver02/Learn/go/demo1/buildin_type"
-	"github.com/miver02/Learn/go/demo1/component"
-	"github.com/miver02/Learn/go/demo1/consts"
-	"github.com/miver02/Learn/go/demo1/control"
-	"github.com/miver02/Learn/go/demo1/funcs"
-	"github.com/miver02/Learn/go/demo1/generics"
-	"github.com/miver02/Learn/go/demo1/hello_world"
-	"github.com/miver02/Learn/go/demo1/types"
-	"github.com/miver02/Learn/go/demo1/variable"
+	hello_world "github.com/miver02/learn-program/go/demo1/Hello_world"
+	"github.com/miver02/learn-program/go/demo1/basic_type"
+	"github.com/miver02/learn-program/go/demo1/buildin_type"
+	"github.com/miver02/learn-program/go/demo1/component"
+	"github.com/miver02/learn-program/go/demo1/consts"
+	"github.com/miver02/learn-program/go/demo1/control"
+	"github.com/miver02/learn-program/go/demo1/funcs"
+	"github.com/miver02/learn-program/go/demo1/generics"
+	"github.com/miver02/learn-program/go/demo1/goroutine"
+	"github.com/miver02/learn-program/go/demo1/types"
+	"github.com/miver02/learn-program/go/demo1/variable"
 )
 
 func BaseGrammer1() {
@@ -98,11 +99,16 @@ func BaseGrammer3() {
 	// 修复类型不匹配，将数组转换为切片
 	generics.AddSlice(list1[:], 5, 6)
 
+	// 并行
+	goroutine.BaseTest()
+	goroutine.ChanInt()
+	goroutine.ChanSem()
+	goroutine.SyncMutex()
 }
 
 func main() {
 	// BaseGrammer1()
 	// BaseGrammer2()
-	// BaseGrammer3()
+	BaseGrammer3()
 
 }
